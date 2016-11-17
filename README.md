@@ -9,7 +9,7 @@
 
 a = Give and save address (2 numbers)
 
-9 = Reset, any other = exit
+9 = Reset
 
 
 Commands:
