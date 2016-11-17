@@ -12,6 +12,7 @@ a = Give and save address (2 numbers)
 9 = Reset, any other = exit
 
 
+Commands:
 - s/S = string
 - i/I = intensity (0...f)
 - t/T = internet clock
