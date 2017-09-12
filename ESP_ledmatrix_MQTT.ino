@@ -354,10 +354,11 @@ char ssid_passwd[64+1];
 void readBytes(char *data, uint16_t maxchars) {
   uint16_t cnt = Serial.readBytesUntil('\n', data, maxchars);
   //data[cnt] = '\0'; //string termination
-  uint16_t i = 0;
-  while (data[i]) { //get rid of extra carriage returns and line feeds (CR = '\r' 0x0D, LF = '\n' 0x0A)
+  //uint16_t i = 0;
+  //while (data[i]) { //get rid of extra carriage returns and line feeds (CR = '\r' 0x0D, LF = '\n' 0x0A)
+  for (i = 0; i < cnt; i++) {
     if (data[i] == '\r' || data[i] == '\n') data[i] = '\0';
-    i++;
+    //i++;
   }
   flush_inbuf;
 }
