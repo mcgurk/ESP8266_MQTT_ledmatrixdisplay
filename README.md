@@ -12,8 +12,15 @@ a = Give and save address (2 numbers)
 9 = Reset
 
 
-Commands:
+## Commands
 - s/S = string
 - i/I = intensity (0...f)
 - t/T = internet clock
 - r/R = raw (4 bytes / line, 8 lines)
+
+## Connections
+- 3.3V -> VCC (red) 
+- GND -> GND (brown)
+- Din -> D7 (orange) (GPIO 13 HSPID)
+- CS -> D8 (yellow) (GPIO 15 HSPICS)
+- CLK -> D5 (green) (GPIO 14 HSPICLK)
