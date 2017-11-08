@@ -17,6 +17,7 @@ a = Give and save address (2 numbers)
 - i/I = intensity (0...f)
 - t/T = internet clock
 - r/R = raw (4 bytes / line, 8 lines)
+
 (e.g. "sHi!" or "ia" or "t" or "r12342234323442345234623472348234")
 
 ## Connections
