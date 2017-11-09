@@ -22,6 +22,8 @@ a = Give and save address (2 numbers)
 
 (you can prefix with 2 number address: 10sHi!)
 
+(S (not s) starts timeout timer, which triggers if last mqtt message is older than 2 hours. this way you can regularly update e.g. temperature and you see if updates are stopped)
+
 ## Connections
 - 3.3V -> VCC (red) 
 - GND -> GND (brown)
