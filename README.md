@@ -12,7 +12,7 @@ a = Give and save address (2 numbers)
 9 = Reset
 
 
-## Commands
+## MQTT commands
 - s/S = string
 - i/I = intensity (0...f)
 - t/T = internet clock
