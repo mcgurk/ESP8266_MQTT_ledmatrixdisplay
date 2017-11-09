@@ -20,6 +20,8 @@ a = Give and save address (2 numbers)
 
 (e.g. "sHi!" or "ia" or "t" or "r12342234323442345234623472348234")
 
+(you can prefix with 2 number address: 10sHi!)
+
 ## Connections
 - 3.3V -> VCC (red) 
 - GND -> GND (brown)
