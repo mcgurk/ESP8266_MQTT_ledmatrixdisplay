@@ -1,5 +1,6 @@
 #define IOTappstory
 
+//IOTappstory (IOTappstory, ArduinoJson)
 #ifdef IOTappstory
 #define APPNAME "LED-matrix_MQTT"
 #define VERSION "V0.9.3"
@@ -41,6 +42,7 @@ WiFiUDP ntpUDP;
 // additionaly you can specify the update interval (in milliseconds).
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 60000);
 uint8_t clockMode = 1;
+uint8_t ntpErrorCnt = 0;
 uint8_t mqttTimeoutEnabled = 0;
 uint32_t lastMqttMessage = 0;
 uint32_t mqttTimeoutLimit = 1000UL*3600UL*2UL; // ms
@@ -70,9 +72,11 @@ time_t getNtpTime() {
   }
   if (timeClient.forceUpdate()) {
     Serial.println("forceupdate ok"); //debug
+    ntpErrorCnt = 0;
     return timeClient.getEpochTime();
   } else {
     Serial.println("forceupdate failed"); //debug
+    ntpErrorCnt++;
     return 0;
   }
 }
@@ -257,7 +261,7 @@ void printHelp() {
   Serial.println("(you can prefix with 2 number address: 10sHi!)");
   Serial.println("(Uppercase letter starts/resets 2h mqtt-timeout timer)");
   Serial.println();
-  Serial.println("-If there is no connection to NTP-server in 1 hour, left bottom pixel blinks.");
+  Serial.println("-If there is no connection to NTP-server in 24 hour, left bottom pixel blinks.");
   Serial.println("-If there is mqtt-timeout timer enabled and no mqtt messages in 2 hours, right bottom pixel blinks.");
   Serial.println("-IOTappstory calls home (checks updates) every 3 hours");
   Serial.println();
@@ -274,6 +278,10 @@ void printHelp() {
 // ----------------------------------------------------------------------------------
 void setup(){
 
+  ledMatrix.init();
+  ledMatrix.clearOffscreen();
+  ledMatrix.commit();
+  
   #ifdef IOTappstory
   IAS.serialdebug(true);
   IAS.begin(true);
@@ -283,7 +291,6 @@ void setup(){
   
   Serial.setTimeout(20000);
   
-  ledMatrix.init();
   ledMatrix.clearOffscreen();
   ledMatrix.commit();
   ledMatrix.setText("Jarnon kello");
@@ -375,7 +382,8 @@ void loop() {
   }
 
   //if NTP time has failed
-  if (timeStatus() == timeNeedsSync) {
+  //if (timeStatus() == timeNeedsSync) {
+  if (ntpErrorCnt > 23) {
     ledMatrix.writePixel(0, 7, (millis() >> 6) & 1);
     ledMatrix.commit();
   }
@@ -528,4 +536,3 @@ void pollSerial() {
   }
   Serial.println();
 }
-
