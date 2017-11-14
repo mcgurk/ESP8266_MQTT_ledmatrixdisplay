@@ -3,7 +3,7 @@
 //IOTappstory (IOTappstory, ArduinoJson)
 #ifdef IOTappstory
 #define APPNAME "LED-matrix_MQTT"
-#define VERSION "V0.9.3"
+#define VERSION "V0.9.5"
 #define COMPDATE __DATE__ __TIME__
 #define MODEBUTTON 0
 #include <IOTAppStory.h>
@@ -189,6 +189,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (token == 't' || token == 'T') { // clock
     clockMode = 1;
   }
+  #ifdef IOTappstory
+  if (token == 'c' || token == 'C') { // IOTappstory call home
+    IAS.callHome();
+  }
+  #endif
   if (token == 'r' || token == 'R') { // "raw"
     clockMode = 0;
     ledMatrix.setOffscreen(payload+1);
