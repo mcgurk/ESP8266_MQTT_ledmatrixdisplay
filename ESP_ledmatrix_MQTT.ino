@@ -3,7 +3,7 @@
 //IOTappstory (IOTappstory, ArduinoJson)
 #ifdef IOTappstory
 #define APPNAME "LED-matrix_MQTT"
-#define VERSION "V0.9.5"
+#define VERSION "V0.9.6"
 #define COMPDATE __DATE__ __TIME__
 #define MODEBUTTON 0
 #include <IOTAppStory.h>
@@ -52,12 +52,14 @@ uint32_t millisAtStart;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+#define TOPIC "ledmatrix/"
 char mqtt_server[100+1];
 char mqtt_username[50+1];
 char mqtt_passwd[50+1];
 char mqtt_clientname[50+1];
-char mqtt_topic[50+1];
-char address[2+1];
+String mqtt_topic;
+//char mqtt_topic[50+1];
+//char address[2+1];
 File f;
 
 volatile uint32_t frame = 0;
@@ -65,6 +67,7 @@ uint8_t scrollerMode = 1;
 
 time_t getNtpTime() {
   Serial.println("getNtpTime()"); //debug
+  //mqttStatus("GetNtpTime");
   static uint8_t udpSetup = 0;
   if (udpSetup == 0){
     timeClient.begin();
@@ -72,10 +75,12 @@ time_t getNtpTime() {
   }
   if (timeClient.forceUpdate()) {
     Serial.println("forceupdate ok"); //debug
+    mqttStatus("GetNtpTime ok");
     ntpErrorCnt = 0;
     return timeClient.getEpochTime();
   } else {
     Serial.println("forceupdate failed"); //debug
+    mqttStatus("GetNtpTime failed");
     ntpErrorCnt++;
     return 0;
   }
@@ -159,7 +164,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.print((char)payload[i]);
     }
   }
-  if (token >= '0' && token <='9') {
+/*  if (token >= '0' && token <='9') {
     if (payload[0] == address[0] && payload[1] == address[1]) {
       Serial.print("(My address)");
       memcpy(payload, payload+2, length-2);
@@ -168,7 +173,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("(Not my address)");
       return;
     }
-  }
+  }*/
   if (token == 's' || token == 'S') { // "string"
     clockMode = 0;
     Serial.print(", ");
@@ -189,6 +194,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (token == 't' || token == 'T') { // clock
     clockMode = 1;
   }
+  if (token == 'p' || token == 'P') { // ping
+    mqttStatus("ping");
+  }
   #ifdef IOTappstory
   if (token == 'c' || token == 'C') { // IOTappstory call home
     IAS.callHome();
@@ -200,8 +208,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     ledMatrix.commit();
   }
   Serial.println();
-  if (token == 'S' || token == 'I' || token == 'T' || token == 'R') mqttTimeoutEnabled = 1;
-  if (token == 's' || token == 'i' || token == 't' || token == 'r') mqttTimeoutEnabled = 0;
+  if (token == 'S' || token == 'I' || token == 'T' || token == 'R' || token == 'P') mqttTimeoutEnabled = 1;
+  if (token == 's' || token == 'i' || token == 't' || token == 'r' || token == 'p') mqttTimeoutEnabled = 0;
+}
+
+void mqttStatus(String status) {
+  if(client.connected()) {
+    //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address) + " - " + status;
+    String message = String(now()) + " - topic: " + mqtt_topic + " - " + status;
+    String topic = String(mqtt_topic) + "/status";
+    client.publish(topic.c_str(), message.c_str(), true); //retain
+  }
 }
 
 void reconnect() {
@@ -216,11 +233,14 @@ void reconnect() {
   if (result) {
     Serial.println("connected");
     // ... and resubscribe
-    client.subscribe(mqtt_topic);
+    client.subscribe(mqtt_topic.c_str());
     // Once connected, publish an announcement...
-    char buf[60];
-    sprintf(buf, "clientname: %s, address: %s - connected", mqtt_clientname, address);
-    client.publish(mqtt_topic, buf);
+    //char buf[60];
+    //sprintf(buf, "clientname: %s, address: %s - connected", mqtt_clientname, address);
+    //client.publish(mqtt_topic, buf);
+    //String str = "clientname: " + String(mqtt_clientname) + ", address: " + String(address) + " - connected";
+    //client.publish(mqtt_topic, str.c_str());
+    mqttStatus("connected");
   } else {
     Serial.print("failed, rc=");
     Serial.print(client.state());
@@ -247,14 +267,18 @@ uint8_t loadSetting(char *filename, char *data, uint16_t maxsize) {
 }
 
 void printHelp() {
+  //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address);
+  String message = String(now()) + " - topic: " + mqtt_topic;
+  Serial.println(message);
   Serial.println();
   Serial.println("1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password");
-  Serial.println("4 = Give and save MQTT-server, 5 = Give and save MQTT-topic, 6 = Give and save MQTT-client name");
+  //Serial.println("4 = Give and save MQTT-server, 5 = Give and save MQTT-topic, 6 = Give and save MQTT-client name");
+  Serial.println("4 = Give and save MQTT-server, 6 = Give and save MQTT-client name");
   Serial.println("7 = Give and save MQTT-username, 8 = Give and save MQTT-password");
-  Serial.println("a = Give and save address (2 numbers)");
+  //Serial.println("a = Give and save address (2 numbers)");
   Serial.println("9 = Reset, any other = exit");
   #ifdef IOTappstory
-  Serial.println("C = Call home / update (IOTappstory)");
+  Serial.println("C = Call home / update firmware (IOTappstory)");
   #endif
   Serial.println();
   Serial.println("MQTT commands:");
@@ -262,8 +286,12 @@ void printHelp() {
   Serial.println("- i/I = intensity (0...f)");
   Serial.println("- t/T = internet clock");
   Serial.println("- r/R = raw (4 bytes / line, 8 lines)");
+  Serial.println("- p/P = ping (reply in \".../status\"-topic)");
+  #ifdef IOTappstory
+  Serial.println("- c/C = call home / update firmware(IOTappstory)");
+  #endif
   Serial.println("(e.g. sHi! or ia or t or r12342234323442345234623472348234)");
-  Serial.println("(you can prefix with 2 number address: 10sHi!)");
+  //Serial.println("(you can prefix with 2 number address: 10sHi!)");
   Serial.println("(Uppercase letter starts/resets 2h mqtt-timeout timer)");
   Serial.println();
   Serial.println("-If there is no connection to NTP-server in 24 hour, left bottom pixel blinks.");
@@ -332,10 +360,11 @@ void setup(){
   uint8_t result = loadSetting("/mqtt_server.txt", mqtt_server, 100);
   if (result == 1 && mqtt_server[0] != '\0') mqttEnabled = 1;
   loadSetting("/mqtt_clientname.txt", mqtt_clientname, 50);
-  loadSetting("/mqtt_topic.txt", mqtt_topic, 50);
+  //loadSetting("/mqtt_topic.txt", mqtt_topic, 50);
+  mqtt_topic = TOPIC + String(mqtt_clientname);
   loadSetting("/mqtt_username.txt", mqtt_username, 50);
   loadSetting("/mqtt_passwd.txt", mqtt_passwd, 50);
-  loadSetting("/address.txt", address, 2);
+  //loadSetting("/address.txt", address, 2);
   Serial.println();
 
   if (mqttEnabled) {
@@ -408,6 +437,7 @@ void poll() {
   #ifdef IOTappstory
   IAS.buttonLoop();
   if (millis() - callHomeEntry > 1000UL*3600UL*3UL) {  // only for development. Please change it to at least 2 hours in production
+    mqttStatus("call home");
     IAS.callHome();
     callHomeEntry = millis();
   }
@@ -485,11 +515,11 @@ void pollSerial() {
       readBytes(mqtt_server, 100);
       saveSetting("/mqtt_server.txt", mqtt_server);
       break;
-    case '5':
+/*    case '5':
       Serial.println("Give MQTT-topic");
       readBytes(mqtt_topic, 50);
       saveSetting("/mqtt_topic.txt", mqtt_topic);
-      break;
+      break;*/
     case '6':
       Serial.println("Give MQTT-client name");
       readBytes(mqtt_clientname, 50);
@@ -505,12 +535,12 @@ void pollSerial() {
       readBytes(mqtt_passwd, 50);
       saveSetting("/mqtt_passwd.txt", mqtt_passwd);
       break;
-    case 'a':
+/*    case 'a':
     case 'A':
       Serial.println("Give address (2 numbers)");
       readBytes(address, 2);
       saveSetting("/address.txt", address);
-      break;
+      break;*/
     #ifdef IOTappstory
     case 'C':
       IAS.callHome();
