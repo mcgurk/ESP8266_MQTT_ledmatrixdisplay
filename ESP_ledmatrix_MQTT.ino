@@ -3,7 +3,7 @@
 //IOTappstory (IOTappstory, ArduinoJson)
 #ifdef IOTappstory
 #define APPNAME "LED-matrix_MQTT"
-#define VERSION "V0.9.7"
+#define VERSION "V0.9.8"
 #define COMPDATE __DATE__ __TIME__
 #define MODEBUTTON 0
 #include <IOTAppStory.h>
@@ -72,17 +72,20 @@ time_t getNtpTime() {
   //mqttStatus("GetNtpTime");
   static uint8_t udpSetup = 0;
   if (udpSetup == 0){
+    Serial.println("first getNtpTime call"); //DEBUG
     timeClient.begin();
     udpSetup = 1;
   }
   if (timeClient.forceUpdate()) {
     Serial.println("forceupdate ok"); //debug
-    mqttStatus("GetNtpTime ok");
     ntpErrorCnt = 0;
-    return timeClient.getEpochTime();
+    uint32_t ti = timeClient.getEpochTime();
+    Serial.println(ti); //DEBUG
+    //mqttStatus("GetNtpTime ok");
+    return ti;
   } else {
     Serial.println("forceupdate failed"); //debug
-    mqttStatus("GetNtpTime failed");
+    //mqttStatus("GetNtpTime failed");
     ntpErrorCnt++;
     return 0;
   }
@@ -214,10 +217,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (token == 's' || token == 'i' || token == 't' || token == 'r' || token == 'p') mqttTimeoutEnabled = 0;
 }
 
-void mqttStatus(char* status) {
-  if(client.connected()) {
+void mqttStatus(char* statusmessage) { // don't call from getNtpTime() because now()!!!
+  if(client.connected() && mqttEnabled) {
     //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address) + " - " + status;
-    sprintf(mqtt_message, "%i - topic: %s, %s - %s", now(), mqtt_topic, VERSION, status);
+    uint32_t ti = now(); // can't use now() from getNtpTime()!!!
+    sprintf(mqtt_message, "%i - topic: %s, %s - %s", ti, mqtt_topic, VERSION, statusmessage);
     client.publish(mqtt_statustopic, mqtt_message, true); //retain
     //message = String(now()) + " - topic: " + mqtt_topic + " - " + status;
     //String topic = String(mqtt_topic) + "/status";
@@ -353,6 +357,7 @@ void setup(){
 
   setSyncProvider(getNtpTime);// Set the external time provider
   setSyncInterval(3600); // Set the number of seconds between re-syncs
+  //setSyncInterval(10); // Set the number of seconds between re-syncs
 
   Serial.println(); Serial.println("Loading settings");
   uint8_t result = loadSetting("/mqtt_server.txt", mqtt_server, 100);
@@ -403,9 +408,9 @@ void loop() {
       //ledMatrix.drawMiniText("99:99:99");
       //ledMatrix.commit();
       //now(); //try to update clock
+      Serial.println("Try to get ntp time again...");
       uint32_t result = timeClient.update(); //try to get ntptime
       if (result) setTime(result); //if success, update clock
-      Serial.println("Try to get ntp time again...");
       /*static uint32_t last_temp = 0;
       uint32_t now_temp = millis();
       if (now_temp - last_temp > 5000UL) { //force ntpupdate every 5s
