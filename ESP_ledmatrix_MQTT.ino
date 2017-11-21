@@ -3,7 +3,7 @@
 //IOTappstory (IOTappstory, ArduinoJson)
 #ifdef IOTappstory
 #define APPNAME "LED-matrix_MQTT"
-#define VERSION "V0.9.6"
+#define VERSION "V0.9.7"
 #define COMPDATE __DATE__ __TIME__
 #define MODEBUTTON 0
 #include <IOTAppStory.h>
@@ -40,7 +40,8 @@ WiFiUDP ntpUDP;
 //NTPClient timeClient(ntpUDP);
 // You can specify the time server pool and the offset, (in seconds)
 // additionaly you can specify the update interval (in milliseconds).
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 60000);
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 5000); //5000 = interval before first succesful update
+//NTPClient timeClient(ntpUDP, "www.fgsdsdgdssdgf.com", 0, 1000);
 uint8_t clockMode = 1;
 uint8_t ntpErrorCnt = 0;
 uint8_t mqttTimeoutEnabled = 0;
@@ -54,12 +55,13 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 #define TOPIC "ledmatrix/"
 char mqtt_server[100+1];
-char mqtt_username[50+1];
-char mqtt_passwd[50+1];
-char mqtt_clientname[50+1];
-String mqtt_topic;
-//char mqtt_topic[50+1];
-//char address[2+1];
+char mqtt_username[30+1];
+char mqtt_passwd[30+1];
+char mqtt_clientname[30+1];
+//String mqtt_topic;
+char mqtt_topic[20+30+1];
+char mqtt_statustopic[20+30+20+1];
+char mqtt_message[15+20+30+10+50]; //time+topic+clientname+version+status
 File f;
 
 volatile uint32_t frame = 0;
@@ -212,12 +214,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (token == 's' || token == 'i' || token == 't' || token == 'r' || token == 'p') mqttTimeoutEnabled = 0;
 }
 
-void mqttStatus(String status) {
+void mqttStatus(char* status) {
   if(client.connected()) {
     //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address) + " - " + status;
-    String message = String(now()) + " - topic: " + mqtt_topic + " - " + status;
-    String topic = String(mqtt_topic) + "/status";
-    client.publish(topic.c_str(), message.c_str(), true); //retain
+    sprintf(mqtt_message, "%i - topic: %s, %s - %s", now(), mqtt_topic, VERSION, status);
+    client.publish(mqtt_statustopic, mqtt_message, true); //retain
+    //message = String(now()) + " - topic: " + mqtt_topic + " - " + status;
+    //String topic = String(mqtt_topic) + "/status";
+    //client.publish(topic.c_str(), message.c_str(), true); //retain
   }
 }
 
@@ -233,13 +237,7 @@ void reconnect() {
   if (result) {
     Serial.println("connected");
     // ... and resubscribe
-    client.subscribe(mqtt_topic.c_str());
-    // Once connected, publish an announcement...
-    //char buf[60];
-    //sprintf(buf, "clientname: %s, address: %s - connected", mqtt_clientname, address);
-    //client.publish(mqtt_topic, buf);
-    //String str = "clientname: " + String(mqtt_clientname) + ", address: " + String(address) + " - connected";
-    //client.publish(mqtt_topic, str.c_str());
+    client.subscribe(mqtt_topic);
     mqttStatus("connected");
   } else {
     Serial.print("failed, rc=");
@@ -268,7 +266,7 @@ uint8_t loadSetting(char *filename, char *data, uint16_t maxsize) {
 
 void printHelp() {
   //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address);
-  String message = String(now()) + " - topic: " + mqtt_topic;
+  String message = String(now()) + " - topic: " + mqtt_topic + ", version:" + VERSION;
   Serial.println(message);
   Serial.println();
   Serial.println("1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password");
@@ -359,11 +357,14 @@ void setup(){
   Serial.println(); Serial.println("Loading settings");
   uint8_t result = loadSetting("/mqtt_server.txt", mqtt_server, 100);
   if (result == 1 && mqtt_server[0] != '\0') mqttEnabled = 1;
-  loadSetting("/mqtt_clientname.txt", mqtt_clientname, 50);
+  loadSetting("/mqtt_clientname.txt", mqtt_clientname, 30);
   //loadSetting("/mqtt_topic.txt", mqtt_topic, 50);
-  mqtt_topic = TOPIC + String(mqtt_clientname);
-  loadSetting("/mqtt_username.txt", mqtt_username, 50);
-  loadSetting("/mqtt_passwd.txt", mqtt_passwd, 50);
+  //mqtt_topic = TOPIC + String(mqtt_clientname);
+  sprintf(mqtt_topic, "%s%s", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
+  //Serial.print("mqtt_topic: "); Serial.println(mqtt_topic); //DEBUG
+  loadSetting("/mqtt_username.txt", mqtt_username, 30);
+  loadSetting("/mqtt_passwd.txt", mqtt_passwd, 30);
   //loadSetting("/address.txt", address, 2);
   Serial.println();
 
@@ -384,6 +385,7 @@ void loop() {
 
   if (mqttEnabled) {
     if (!client.connected()) {
+      //Serial.println("reconnect!!!"); //DEBUG
       reconnect();
       poll();
     }
@@ -400,7 +402,17 @@ void loop() {
       //ledMatrix.clearOffscreen();
       //ledMatrix.drawMiniText("99:99:99");
       //ledMatrix.commit();
-      now(); //try to update clock
+      //now(); //try to update clock
+      uint32_t result = timeClient.update(); //try to get ntptime
+      if (result) setTime(result); //if success, update clock
+      Serial.println("Try to get ntp time again...");
+      /*static uint32_t last_temp = 0;
+      uint32_t now_temp = millis();
+      if (now_temp - last_temp > 5000UL) { //force ntpupdate every 5s
+        uint32_t result = getNtpTime(); //try to get ntptime
+        if (result) setTime(result); //if success, update clock
+        last_temp = now_temp;
+      }*/
     }
   }
 
