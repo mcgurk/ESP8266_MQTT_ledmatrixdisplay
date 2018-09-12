@@ -24,6 +24,14 @@ a = Give and save address (2 numbers)
 
 (S (not s) starts timeout timer, which triggers if last mqtt message is older than 2 hours. this way you can regularly update e.g. temperature and you see if updates are stopped)
 
+## MQTT testing
+```
+mosquitto_sub -d -h localhost -t /# -u username -P password
+```
+```
+mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u username -P password
+```
+
 ## Connections
 - 3.3V -> VCC (red) 
 - GND -> GND (brown)
