@@ -51,3 +51,4 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 ## Arduino IDE
 
 - File -> Preferences -> Additional Boards Manager URLs: http://arduino.esp8266.com/stable/package_esp8266com_index.json
+- NodeMCU 1.0 (ESP-12E Module)
