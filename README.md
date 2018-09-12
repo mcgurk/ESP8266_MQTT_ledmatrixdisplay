@@ -47,6 +47,7 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 
 - IOTAppStory-ESP (2.0.0 8.9.2018)
 - https://iotappstory.com
+Install these libraries:
 - https://github.com/iotappstory/ESP-Library/releases
 - https://github.com/me-no-dev/ESPAsyncTCP
 - https://github.com/me-no-dev/ESPAsyncWebServer
