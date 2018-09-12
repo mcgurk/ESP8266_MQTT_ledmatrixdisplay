@@ -52,3 +52,9 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 
 - File -> Preferences -> Additional Boards Manager URLs: http://arduino.esp8266.com/stable/package_esp8266com_index.json
 - NodeMCU 1.0 (ESP-12E Module)
+
+## Flash binary directly in Windows Powershell
+
+```
+& $ENV:LOCALAPPDATA\Arduino15\packages\esp8266\tools\esptool\0.4.13\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM3 -ca 0x00000 -cf $ENV:USERPROFILE\Downloads\ESP_ledmatrix_MQTT_v2.ino.nodemcu.bin
+```
