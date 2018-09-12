@@ -7,8 +7,6 @@
 
 7 = Give and save MQTT-username, 8 = Give and save MQTT-password
 
-a = Give and save address (2 numbers)
-
 9 = Reset
 
 
@@ -19,8 +17,6 @@ a = Give and save address (2 numbers)
 - r/R = raw (4 bytes / line, 8 lines)
 
 (e.g. "sHi!" or "ia" or "t" or "r12342234323442345234623472348234")
-
-(you can prefix with 2 number address: 10sHi!)
 
 (S (not s) starts timeout timer, which triggers if last mqtt message is older than 2 hours. this way you can regularly update e.g. temperature and you see if updates are stopped)
 
