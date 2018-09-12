@@ -330,15 +330,18 @@ void setup(){
   IAS.setCallHome(true); // Set to true to enable calling home frequently (disabled by default)
   IAS.setCallHomeInterval(60*60*3); // Call home interval in seconds, use 60s only for development. Please change it to at least 2 hours in production
   
-  Serial.print(F("ms: ")); Serial.println(ms);
   strcpy(mqtt_server, ms);
   strcpy(mqtt_username, mu);
   strcpy(mqtt_passwd, mp);
   strcpy(mqtt_clientname, mc);
-  Serial.print(F("mqtt_server: ")); Serial.println(mqtt_server);
   sprintf(mqtt_topic, "%s%s", TOPIC, mqtt_clientname);
   sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
-  Serial.print(F("mqtt_topic: ")); Serial.println(mqtt_topic);
+  if (mqtt_server[0] != '\0') mqttEnabled = 1;
+
+  Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
+  Serial.print(F("mqtt_server: \"")); Serial.print(mqtt_server); Serial.println(F("\"")); 
+  Serial.print(F("mqtt_topic: \"")); Serial.print(mqtt_topic); Serial.println(F("\"")); 
+  Serial.print(F("mqtt_username: \"")); Serial.print(mqtt_username); Serial.println(F("\"")); 
   
   #else
   Serial.begin(115200);
