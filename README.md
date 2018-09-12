@@ -1,6 +1,6 @@
 # ESP8266_MQTT_ledmatrixdisplay
 
-### Serial (115200bps)
+## Serial (115200bps)
 
 1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password
 
