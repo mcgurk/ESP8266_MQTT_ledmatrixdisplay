@@ -221,10 +221,10 @@ void reconnect() {
   // Attempt to connect
   uint8_t result;
   //don't enable authentication if username is empty or only one character
-  if (mqtt_username[0] == '\0' && mqtt_username[1] == '\0')
-    result = client.connect(mqtt_clientname);
-  else
+  if (mqtt_username[0] != '\0' && mqtt_username[1] != '\0')
     result = client.connect(mqtt_clientname, mqtt_username, mqtt_passwd);
+  else
+    result = client.connect(mqtt_clientname);
   if (result) {
     Serial.println("connected");
     // ... and resubscribe
