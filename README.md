@@ -42,5 +42,6 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 
 ## IOTAppsStory
 
+- IOTAppStory-ESP (2.0.0 8.9.2018)
 - https://iotappstory.com
 - https://github.com/iotappstory/ESP-Library/releases
