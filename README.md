@@ -45,3 +45,9 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 - IOTAppStory-ESP (2.0.0 8.9.2018)
 - https://iotappstory.com
 - https://github.com/iotappstory/ESP-Library/releases
+- https://github.com/me-no-dev/ESPAsyncTCP
+- https://github.com/me-no-dev/ESPAsyncWebServer
+
+## Arduino IDE
+
+- File -> Preferences -> Additional Boards Manager URLs: http://arduino.esp8266.com/stable/package_esp8266com_index.json
