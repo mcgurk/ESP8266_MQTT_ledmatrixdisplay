@@ -1,15 +1,13 @@
 #define IOTappstory
 
-#define VERSION "V0.9.9.4"
+#define VERSION "V2.0.0"
 
 #ifdef IOTappstory
 //#define APPNAME "LED-matrix_MQTT"
 #define COMPDATE __DATE__ __TIME__
 #define MODEBUTTON 0
 #include <IOTAppStory.h>
-//IOTAppStory IAS(APPNAME,VERSION,COMPDATE,MODEBUTTON);
 IOTAppStory IAS(COMPDATE,MODEBUTTON);
-//unsigned long callHomeEntry = millis();
 #endif
 
 //ESP8266 Wifi
@@ -147,8 +145,6 @@ String getFormattedTime(unsigned long epoch) {
 
 
 uint8_t pollScroller() {
-  //static int frame = 0;
-  //if (frame >= 116) return false;
   ledMatrix.clearOffscreen();
   ledMatrix.scrollTextLeft();
   ledMatrix.drawText();
@@ -169,16 +165,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.print((char)payload[i]);
     }
   }
-/*  if (token >= '0' && token <='9') {
-    if (payload[0] == address[0] && payload[1] == address[1]) {
-      Serial.print("(My address)");
-      memcpy(payload, payload+2, length-2);
-      token = payload[0];
-    } else {
-      Serial.println("(Not my address)");
-      return;
-    }
-  }*/
   if (token == 's' || token == 'S') { // "string"
     clockMode = 0;
     Serial.print(", ");
@@ -273,15 +259,15 @@ void printHelp() {
   String message = String(now()) + " - topic: " + mqtt_topic + ", version:" + VERSION;
   Serial.println(message);
   Serial.println();
+  #ifndef IOTappstory
   Serial.println("1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password");
-  //Serial.println("4 = Give and save MQTT-server, 5 = Give and save MQTT-topic, 6 = Give and save MQTT-client name");
   Serial.println("4 = Give and save MQTT-server, 6 = Give and save MQTT-client name");
   Serial.println("7 = Give and save MQTT-username, 8 = Give and save MQTT-password");
-  //Serial.println("a = Give and save address (2 numbers)");
-  Serial.println("9 = Reset, any other = exit");
+  #endif
   #ifdef IOTappstory
   Serial.println("C = Call home / update firmware (IOTappstory)");
   #endif
+  Serial.println("9 = Reset, any other = exit");
   Serial.println();
   Serial.println("MQTT commands:");
   Serial.println("- s/S = string");
@@ -293,7 +279,6 @@ void printHelp() {
   Serial.println("- c/C = call home / update firmware(IOTappstory)");
   #endif
   Serial.println("(e.g. sHi! or ia or t or r12342234323442345234623472348234)");
-  //Serial.println("(you can prefix with 2 number address: 10sHi!)");
   Serial.println("(Uppercase letter starts/resets 2h mqtt-timeout timer)");
   Serial.println();
   Serial.println("-If there is no connection to NTP-server in 24 hour, left bottom pixel blinks.");
@@ -337,11 +322,10 @@ void setup(){
   sprintf(mqtt_topic, "%s%s", TOPIC, mqtt_clientname);
   sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
   if (mqtt_server[0] != '\0') mqttEnabled = 1;
-
-  Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
+  /*Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
   Serial.print(F("mqtt_server: \"")); Serial.print(mqtt_server); Serial.println(F("\"")); 
   Serial.print(F("mqtt_topic: \"")); Serial.print(mqtt_topic); Serial.println(F("\"")); 
-  Serial.print(F("mqtt_username: \"")); Serial.print(mqtt_username); Serial.println(F("\"")); 
+  Serial.print(F("mqtt_username: \"")); Serial.print(mqtt_username); Serial.println(F("\"")); */
   
   #else
   Serial.begin(115200);
@@ -371,7 +355,6 @@ void setup(){
   sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
   loadSetting("/mqtt_username.txt", mqtt_username, 30);
   loadSetting("/mqtt_passwd.txt", mqtt_passwd, 30);
-  Serial.println();
   #endif
   
   Serial.println();
@@ -424,13 +407,6 @@ void loop() {
       Serial.println("Try to get ntp time again...");
       uint32_t result = timeClient.update(); //try to get ntptime
       if (result) setTime(result); //if success, update clock
-      /*static uint32_t last_temp = 0;
-      uint32_t now_temp = millis();
-      if (now_temp - last_temp > 5000UL) { //force ntpupdate every 5s
-        uint32_t result = getNtpTime(); //try to get ntptime
-        if (result) setTime(result); //if success, update clock
-        last_temp = now_temp;
-      }*/
     }
   }
 
@@ -442,6 +418,7 @@ void loop() {
     if (mqttTimeoutTriggered) {
       ledMatrix.writePixel(31, 7, (millis() >> 6) & 1);
       ledMatrix.commit();
+      delay(200);
     }
   }
 
@@ -450,6 +427,7 @@ void loop() {
   if (ntpErrorCnt > 23) {
     ledMatrix.writePixel(0, 7, (millis() >> 6) & 1);
     ledMatrix.commit();
+    delay(200);
   }
  
   poll();
@@ -466,12 +444,6 @@ void poll() {
   pollSerial();
   #ifdef IOTappstory
   IAS.loop();                                // this routine handles the calling home on the configured itnerval as well as reaction of the Flash button. If short press: update of skethc, long press: Configuration
-  /*IAS.buttonLoop();
-  if (millis() - callHomeEntry > 1000UL*3600UL*3UL) {  // only for development. Please change it to at least 2 hours in production
-    mqttStatus("call home");
-    IAS.callHome();
-    callHomeEntry = millis();
-  }*/
   #endif
 }
 
@@ -546,11 +518,6 @@ void pollSerial() {
       readBytes(mqtt_server, 100);
       saveSetting("/mqtt_server.txt", mqtt_server);
       break;
-/*    case '5':
-      Serial.println("Give MQTT-topic");
-      readBytes(mqtt_topic, 50);
-      saveSetting("/mqtt_topic.txt", mqtt_topic);
-      break;*/
     case '6':
       Serial.println("Give MQTT-client name");
       readBytes(mqtt_clientname, 50);
@@ -566,31 +533,10 @@ void pollSerial() {
       readBytes(mqtt_passwd, 50);
       saveSetting("/mqtt_passwd.txt", mqtt_passwd);
       break;
-/*    case 'a':
-    case 'A':
-      Serial.println("Give address (2 numbers)");
-      readBytes(address, 2);
-      saveSetting("/address.txt", address);
-      break;*/
     #ifdef IOTappstory
     case 'C':
       IAS.callHome();
       break;
-    /*case 'R':
-      Serial.println("Reset EEPROM?");
-      Serial.println("Are you sure (y/n)?");
-      token = waitAndReadNextChar();
-      if (token == 'y' || token == 'Y') {
-        Serial.println("Start to reset EEPROM");
-        //IAS.end();
-        delay(1000);
-        String boardName = APPNAME"_" + WiFi.macAddress();
-        IAS.preSetConfig(boardName, false);
-        IAS.begin(true, true);
-        IAS.callHome(true);
-        Serial.println("Done!");
-      } else Serial.println("Reset canceled");
-      break;*/
     #endif
     case '9':
       ESP.restart();
