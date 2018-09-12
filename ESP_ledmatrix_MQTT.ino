@@ -300,10 +300,11 @@ void setup(){
 
   ledMatrix.init();
   ledMatrix.clearOffscreen();
+  for (int i = 0; i < 4; i++) ledMatrix.drawChar('-', i);
   ledMatrix.commit();
   
   #ifdef IOTappstory
-  IAS.preSetDeviceName("ledmatrixESP");                         // preset deviceName this is also your MDNS responder: http://iasblink.local
+  IAS.preSetDeviceName("ledmatrixESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
 
   char *ms, *mu, *mp, *mc;
   IAS.addField(ms, "MQTT server", 100);
