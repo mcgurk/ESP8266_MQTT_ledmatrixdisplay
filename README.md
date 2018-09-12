@@ -17,7 +17,7 @@ C = Call home / update firmware (IOTappstory)
 - s/S = string
 - i/I = intensity (0...f)
 - t/T = internet clock
-- r/R = raw (4 bytes / line, 8 lines)
+- r/R = raw (4 bytes / line, 8 lines -> 32 bytes)
 
 (e.g. "sHi!" or "ia" or "t" or "r12342234323442345234623472348234")
 
