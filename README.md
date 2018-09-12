@@ -47,14 +47,16 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 
 - IOTAppStory-ESP (2.0.0 8.9.2018)
 - https://iotappstory.com
+- https://github.com/iotappstory/ESP-Library
 
 Install these libraries:
 - https://github.com/iotappstory/ESP-Library/releases
 - https://github.com/me-no-dev/ESPAsyncTCP
 - https://github.com/me-no-dev/ESPAsyncWebServer
 
--Short press (>500ms & <4000ms): Call home
--Long press (>4000ms & <10000ms): Reboot to config mode
+User-button (default GPIO0/"flash"):
+- Short press (>500ms & <4000ms): Call home
+- Long press (>4000ms & <10000ms): Reboot to config mode
 
 Wifi and MQTT-information are given in configuration mode.
 
