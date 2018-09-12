@@ -1,6 +1,6 @@
 #define IOTappstory
 
-#define VERSION "V2.0.0"
+#define VERSION "V2.0.1"
 
 #ifdef IOTappstory
 //#define APPNAME "LED-matrix_MQTT"
@@ -220,7 +220,8 @@ void reconnect() {
   if (mqtt_clientname[0] == '\0') mqtt_clientname[0] = 'a';
   // Attempt to connect
   uint8_t result;
-  if (mqtt_username[0] == '\0')
+  //don't enable authentication if username is empty or only one character
+  if (mqtt_username[0] == '\0' && mqtt_username[1] == '\0')
     result = client.connect(mqtt_clientname);
   else
     result = client.connect(mqtt_clientname, mqtt_username, mqtt_passwd);
@@ -322,7 +323,6 @@ void setup(){
   strcpy(mqtt_clientname, mc);
   sprintf(mqtt_topic, "%s%s", TOPIC, mqtt_clientname);
   sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
-  if (mqtt_server[0] != '\0') mqttEnabled = 1;
   /*Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
   Serial.print(F("mqtt_server: \"")); Serial.print(mqtt_server); Serial.println(F("\"")); 
   Serial.print(F("mqtt_topic: \"")); Serial.print(mqtt_topic); Serial.println(F("\"")); 
@@ -369,6 +369,8 @@ void setup(){
   setSyncProvider(getNtpTime);// Set the external time provider
   setSyncInterval(3600); // Set the number of seconds between re-syncs
 
+  //don't enable MQTT if server is empty or only one character
+  if (mqtt_server[0] != '\0' && mqtt_server[1] != '\0') mqttEnabled = 1;
   if (mqttEnabled) {
     client.setServer(mqtt_server, 1883);
     client.setCallback(callback);
