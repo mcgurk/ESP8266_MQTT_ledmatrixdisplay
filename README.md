@@ -26,9 +26,12 @@ C = Call home / update firmware (IOTappstory)
 (S (not s) starts timeout timer, which triggers if last mqtt message is older than 2 hours. this way you can regularly update e.g. temperature and you see if updates are stopped)
 
 ### MQTT testing
+
+Subscribe to all topics:
 ```
 mosquitto_sub -d -h localhost -t /# -u username -P password
 ```
+Send Hi! to display:
 ```
 mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u username -P password
 ```
