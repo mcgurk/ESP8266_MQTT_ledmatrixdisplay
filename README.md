@@ -54,7 +54,7 @@ Install these libraries:
 - https://github.com/me-no-dev/ESPAsyncTCP
 - https://github.com/me-no-dev/ESPAsyncWebServer
 
-User-button (default GPIO0/"flash"):
+User-button (default GPIO0/D3/"flash"):
 - Short press (>500ms & <4000ms): Call home
 - Long press (>4000ms & <10000ms): Reboot to config mode
 
