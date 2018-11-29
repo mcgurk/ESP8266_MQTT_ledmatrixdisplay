@@ -1,6 +1,6 @@
 #define IOTappstory
 
-#define VERSION "V2.0.1"
+#define VERSION "V2.0.2"
 
 #ifdef IOTappstory
 //#define APPNAME "LED-matrix_MQTT"
