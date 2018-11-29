@@ -306,7 +306,8 @@ void setup(){
   
   #ifdef IOTappstory
   IAS.preSetDeviceName("ledmatrixESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
-
+  IAS.preSetAutoConfig(false); //go autoconfig-mode only with button
+    
   char *ms, *mu, *mp, *mc;
   IAS.addField(ms, "MQTT server", 100);
   IAS.addField(mu, "MQTT username", 30);
