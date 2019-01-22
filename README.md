@@ -1,5 +1,12 @@
 # ESP8266_MQTT_ledmatrixdisplay
 
+## Button
+
+- NodeMCU: Flash button (GPIO0)
+- over 0,5s, under 4s: Call home
+- over 4s, under 10s: Configuration mode
+- over 10s: nothing
+
 ## Serial (115200bps)
 
 1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password
