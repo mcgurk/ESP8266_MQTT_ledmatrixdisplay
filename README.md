@@ -29,6 +29,7 @@ C = Call home / update firmware (IOTappstory)
 - r/R = raw (4 bytes / line, 8 lines -> 32 bytes)
 
 (e.g. "sHi!" or "ia" or "t" or "r12342234323442345234623472348234")
+(echo -ne "r\x00\x01\x02\x03\x04..." | mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -s -u username -P password)
 
 (S (not s) starts timeout timer, which triggers if last mqtt message is older than 2 hours. this way you can regularly update e.g. temperature and you see if updates are stopped)
 
