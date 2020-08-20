@@ -29,13 +29,11 @@ config Default = {{"wsid","wpasswd"},{"msrv","muser","mpasswd","mtopic","mid"}};
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
-//#define MSG_BUFFER_SIZE	1024
-//char msg[MSG_BUFFER_SIZE];
 char msg[1024]; //heap?
 
 int value = 0;
-StaticJsonDocument<1024> doc; //stack?? or heap?? or static memory??
-StaticJsonDocument<1024> jsonconfig;
+//StaticJsonDocument<1024> doc; //stack?? or heap?? or static memory??
+//StaticJsonDocument<1024> jsonconfig;
 
 void setup_wifi() {
   //Serial.setDebugOutput(true);
@@ -103,22 +101,24 @@ void setup() {
   SPIFFS.begin();
   SPIFFS_dir();
 
+  DynamicJsonDocument doccfg(1024);
+    
   #ifdef SAVE_DEFAULT_CONFIG_TO_FILE
-  JsonObject docwifi = jsonconfig.createNestedObject("wifi");
+  JsonObject docwifi = doccfg.createNestedObject("wifi");
   docwifi["ssid"] = Default.wifi.ssid;
   docwifi["password"] = Default.wifi.password;
-  JsonObject docmqtt = jsonconfig.createNestedObject("mqtt");
+  JsonObject docmqtt = doccfg.createNestedObject("mqtt");
   docmqtt["server"] = Default.mqtt.server;
   docmqtt["username"] = Default.mqtt.username;
   docmqtt["password"] = Default.mqtt.password;
   docmqtt["topic"] = Default.mqtt.topic;
   docmqtt["clientid"] = Default.mqtt.clientid;
-  serializeJsonPretty(jsonconfig, Serial); Serial.println();
+  serializeJsonPretty(doccfg, Serial); Serial.println();
   //Serial.println("Saving config.json");
   Serial.println("Saving "CONFIG_FILENAME);
   //File f = SPIFFS.open("/config2.json", "w");
   File f = SPIFFS.open("/"CONFIG_FILENAME, "w");
-  if (serializeJsonPretty(jsonconfig, f) == 0) {
+  if (serializeJsonPretty(doccfg, f) == 0) {
     Serial.println(F("Failed to write to file"));
   }
   f.close();
@@ -129,31 +129,31 @@ void setup() {
   //#ifdef USE_CONFIG_FILE
   Serial.println("Loading "CONFIG_FILENAME);
   File f = SPIFFS.open("/"CONFIG_FILENAME, "r");
-  DeserializationError error = deserializeJson(jsonconfig, f);
+  DeserializationError error = deserializeJson(doccfg, f);
   if (error)
     Serial.println(F("Failed to read file, using default configuration"));
   f.close();
-  strlcpy(Config.wifi.ssid,                                // <- destination (https://arduinojson.org/v6/example/config/)
-          jsonconfig["wifi"]["ssid"] | Default.wifi.ssid,  // <- source
-          sizeof(Config.wifi.ssid));                       // <- destination's capacity
-  strlcpy(Config.wifi.password,                                    // <- destination
-          jsonconfig["wifi"]["password"] | Default.wifi.password,  // <- source
-          sizeof(Config.wifi.password));                           // <- destination's capacity
-  strlcpy(Config.mqtt.server,                                  // <- destination
-          jsonconfig["mqtt"]["server"] | Default.mqtt.server,  // <- source
-          sizeof(Config.mqtt.server));                         // <- destination's capacity
-  strlcpy(Config.mqtt.username,                                    // <- destination
-          jsonconfig["mqtt"]["username"] | Default.mqtt.username,  // <- source
-          sizeof(Config.mqtt.username));                           // <- destination's capacity
-  strlcpy(Config.mqtt.password,                                    // <- destination
-          jsonconfig["mqtt"]["password"] | Default.mqtt.password,  // <- source
-          sizeof(Config.mqtt.password));                           // <- destination's capacity
-  strlcpy(Config.mqtt.topic,                                 // <- destination
-          jsonconfig["mqtt"]["topic"] | Default.mqtt.topic,  // <- source
-          sizeof(Config.mqtt.topic));                        // <- destination's capacity
-  strlcpy(Config.mqtt.clientid,                                    // <- destination
-          jsonconfig["mqtt"]["clientid"] | Default.mqtt.clientid,  // <- source
-          sizeof(Config.mqtt.clientid));                           // <- destination's capacity
+  strlcpy(Config.wifi.ssid,                           // <- destination (https://arduinojson.org/v6/example/config/)
+          doccfg["wifi"]["ssid"] | Default.wifi.ssid, // <- source
+          sizeof(Config.wifi.ssid));                  // <- destination's capacity
+  strlcpy(Config.wifi.password,                               // <- destination
+          doccfg["wifi"]["password"] | Default.wifi.password, // <- source
+          sizeof(Config.wifi.password));                      // <- destination's capacity
+  strlcpy(Config.mqtt.server,                             // <- destination
+          doccfg["mqtt"]["server"] | Default.mqtt.server, // <- source
+          sizeof(Config.mqtt.server));                    // <- destination's capacity
+  strlcpy(Config.mqtt.username,                               // <- destination
+          doccfg["mqtt"]["username"] | Default.mqtt.username, // <- source
+          sizeof(Config.mqtt.username));                      // <- destination's capacity
+  strlcpy(Config.mqtt.password,                               // <- destination
+          doccfg["mqtt"]["password"] | Default.mqtt.password, // <- source
+          sizeof(Config.mqtt.password));                      // <- destination's capacity
+  strlcpy(Config.mqtt.topic,                             // <- destination
+          doccfg["mqtt"]["topic"] | Default.mqtt.topic,  // <- source
+          sizeof(Config.mqtt.topic));                    // <- destination's capacity
+  strlcpy(Config.mqtt.clientid,                               // <- destination
+          doccfg["mqtt"]["clientid"] | Default.mqtt.clientid, // <- source
+          sizeof(Config.mqtt.clientid));                      // <- destination's capacity
   Serial.print("Config.wifi.ssid: \""); Serial.print(Config.wifi.ssid); Serial.println("\"");
   Serial.print("Config.wifi.password: \""); Serial.print(Config.wifi.password); Serial.println("\"");
   Serial.print("Config.mqtt.server: \""); Serial.print(Config.mqtt.server); Serial.println("\"");
@@ -190,11 +190,15 @@ void loop() {
     Serial.print("Publish message: ");
     //Serial.println(msg);
     time_t now = time(nullptr);
-    String date = ctime(&now);
+    //String date = ctime(&now);
+    char *date = ctime(&now);
+    date[strcspn(date, "\r\n")] = 0; //remove \r and/or \n
     //Serial.print(ctime(&current));
     //client.publish("outTopic", msg);
     //Serial.println(ESP.getFreeHeap());
     //DynamicJsonDocument doc(1024); //heap (https://arduinojson.org/v6/example/generator/)
+    //StaticJsonDocument<1024> doc; //stack?? or heap?? or static memory??
+    DynamicJsonDocument doc(1024); // https://arduinojson.org/v6/how-to/reuse-a-json-document/
     //char msg[1024]; //stack
     //Serial.println(ESP.getFreeHeap());
     doc["client"] = Config.mqtt.clientid;
@@ -202,11 +206,15 @@ void loop() {
     doc["time"] = now;
     doc["date"] = date;
     doc["data"] = "sdgsgsdfsf";
-    Serial.print(date);
+    JsonObject docesp = doc.createNestedObject("ESP");
+    docesp["chipId"] = ESP.getChipId();
+    docesp["freeHeap"] = ESP.getFreeHeap();
+    //Serial.print(date);
+    //String d = doc["date"];
+    //Serial.print(d);
     serializeJson(doc, msg);
     Serial.println(msg);
     client.publish("lora", msg);
-    //SPIFFS_dir();
   }
 }
 
