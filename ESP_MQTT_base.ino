@@ -5,11 +5,10 @@
 
 #define TRIGGER_PIN 0
 
-//#define SAVE_DEFAULT_CONFIG_TO_FILE
-//#define USE_CONFIG_FILE
+//#define SAVE_DEFAULT_CONFIG_TO_FILE_AND_HALT
 #define CONFIG_FILENAME "config.json"
 
-//#define OVERRIDE_WIFIMANAGER_WIFI_SETTINGS //CAUTION! FOR TESTING ONLY. THIS IS PERMANEN AND WIFIMANAGER CANT SET SSID/PASSWORD IF THIS IS ENABLED.
+//#define OVERRIDE_WIFIMANAGER_WIFI_SETTINGS //CAUTION! FOR TESTING ONLY. THIS IS PERMANENT AND WIFIMANAGER CAN'T SET SSID/PASSWORD IF THIS IS ENABLED. SSID AND PASSWORD IS TAKEN FROM CONFIG JSON FILE.
 
 struct Mqtt_config {
   char server[100+1];
@@ -110,7 +109,12 @@ void reconnect() {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     //auto result = client.connect(Config.mqtt.clientid);
-    auto result = client.connect(Config.mqtt.clientid, Config.mqtt.username, Config.mqtt.password);
+    int result;
+    if (Config.mqtt.username[0]) {
+      result = client.connect(Config.mqtt.clientid, Config.mqtt.username, Config.mqtt.password);
+    } else {
+      result = client.connect(Config.mqtt.clientid);
+    }
     if (result) {
       Serial.println("connected");
       // Once connected, publish an announcement...
@@ -142,31 +146,12 @@ void setup() {
   SPIFFS.begin();
   SPIFFS_dir();
 
-  DynamicJsonDocument doccfg(1024);
-    
-  #ifdef SAVE_DEFAULT_CONFIG_TO_FILE
-  JsonObject docwifi = doccfg.createNestedObject("wifi");
-  docwifi["ssid"] = Default.wifi.ssid;
-  docwifi["password"] = Default.wifi.password;
-  JsonObject docmqtt = doccfg.createNestedObject("mqtt");
-  docmqtt["server"] = Default.mqtt.server;
-  docmqtt["username"] = Default.mqtt.username;
-  docmqtt["password"] = Default.mqtt.password;
-  docmqtt["topic"] = Default.mqtt.topic;
-  docmqtt["clientid"] = Default.mqtt.clientid;
-  serializeJsonPretty(doccfg, Serial); Serial.println();
-  //Serial.println("Saving config.json");
-  Serial.println("Saving "CONFIG_FILENAME);
-  //File f = SPIFFS.open("/config2.json", "w");
-  File f = SPIFFS.open("/"CONFIG_FILENAME, "w");
-  if (serializeJsonPretty(doccfg, f) == 0) {
-    Serial.println(F("Failed to write to file"));
-  }
-  f.close();
-  Serial.println("Ready. Halted.");
-  while(true) delay(100);
+  #ifdef SAVE_DEFAULT_CONFIG_TO_FILE_AND_HALT
+  save_default_settings_to_file();
   #endif
   
+  DynamicJsonDocument doccfg(1024);
+    
   Serial.println("Loading "CONFIG_FILENAME);
   File f = SPIFFS.open("/"CONFIG_FILENAME, "r");
   DeserializationError error = deserializeJson(doccfg, f);
@@ -234,7 +219,7 @@ void loop() {
     DynamicJsonDocument doc(1024); //heap https://arduinojson.org/v6/how-to/reuse-a-json-document/
     //char msg[1024]; //stack
     doc["client"] = Config.mqtt.clientid;
-    doc["sensor"] = value;
+    doc["counter"] = value;
     doc["time"] = now;
     doc["date"] = date;
     doc["data"] = "sdgsgsdfsf";
@@ -262,28 +247,30 @@ void SPIFFS_dir() {
   Serial.println("----------------------");
 }
 
-/*
-  #ifdef SAVE_DEFAULT_CONFIG_TO_FILE
-  JsonObject docwifi = jsonconfig.createNestedObject("wifi");
-  docwifi["ssid"] = Config.wifi.ssid;
-  docwifi["password"] = Config.wifi.password;
-  JsonObject docmqtt = jsonconfig.createNestedObject("mqtt");
-  docmqtt["server"] = Config.mqtt.server;
-  docmqtt["username"] = Config.mqtt.username;
-  docmqtt["password"] = Config.mqtt.password;
-  docmqtt["topic"] = Config.mqtt.topic;
-  docmqtt["clientid"] = Config.mqtt.clientid;
-  serializeJsonPretty(jsonconfig, Serial); Serial.println();
-  Serial.println("Saving config.json");
-  File f = SPIFFS.open("/config2.json", "w");
-  if (serializeJsonPretty(jsonconfig, f) == 0) {
+
+void save_default_settings_to_file() {
+  DynamicJsonDocument doccfg(1024);
+  JsonObject docwifi = doccfg.createNestedObject("wifi");
+  docwifi["ssid"] = Default.wifi.ssid;
+  docwifi["password"] = Default.wifi.password;
+  JsonObject docmqtt = doccfg.createNestedObject("mqtt");
+  docmqtt["server"] = Default.mqtt.server;
+  docmqtt["username"] = Default.mqtt.username;
+  docmqtt["password"] = Default.mqtt.password;
+  docmqtt["topic"] = Default.mqtt.topic;
+  docmqtt["clientid"] = Default.mqtt.clientid;
+  serializeJsonPretty(doccfg, Serial); Serial.println();
+  Serial.println(F("Saving "CONFIG_FILENAME));
+  File f = SPIFFS.open("/"CONFIG_FILENAME, "w");
+  if (serializeJsonPretty(doccfg, f) == 0) {
     Serial.println(F("Failed to write to file"));
   }
   f.close();
-  Serial.println("Ready. Halted.");
+  Serial.println("Save Wifi-settings (WiFi.begin(ssid, password))");
+  WiFi.begin(Config.wifi.ssid, Config.wifi.password);
+  Serial.println("Ready. Halted. Flash sketch again without SAVE_DEFAULT_CONFIG_TO_FILE-flag.");
   while(true) delay(100);
-  #endif
- */
+}
 
  void checkButton(){
   // check for button press
@@ -305,7 +292,8 @@ void SPIFFS_dir() {
       Serial.println("Starting config portal");
       wm.setConfigPortalTimeout(120);
       
-      if (!wm.startConfigPortal("OnDemandAP","password")) {
+      //if (!wm.startConfigPortal("OnDemandAP","password")) {
+      if (!wm.startConfigPortal("OnDemandAP")) {
         Serial.println("failed to connect or hit timeout");
         delay(3000);
         // ESP.restart();
