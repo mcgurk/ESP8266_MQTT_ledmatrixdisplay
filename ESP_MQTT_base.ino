@@ -2,8 +2,9 @@
 #include <PubSubClient.h> //from library manager
 #include <ArduinoJson.h>  //from library manager
 
-//#define SAVECONFIG
-#define USE_CONFIG_FILE
+//#define SAVE_DEFAULT_CONFIG_TO_FILE
+//#define USE_CONFIG_FILE
+#define CONFIG_FILENAME "config.json"
 
 struct Mqtt_config {
   char server[100+1];
@@ -102,42 +103,32 @@ void setup() {
   SPIFFS.begin();
   SPIFFS_dir();
 
-  /*JsonObject docwifi = jsonconfig.createNestedObject("wifi");
-  docwifi["ssid"] = Config.wifi.ssid;
-  docwifi["password"] = Config.wifi.password;
+  #ifdef SAVE_DEFAULT_CONFIG_TO_FILE
+  JsonObject docwifi = jsonconfig.createNestedObject("wifi");
+  docwifi["ssid"] = Default.wifi.ssid;
+  docwifi["password"] = Default.wifi.password;
   JsonObject docmqtt = jsonconfig.createNestedObject("mqtt");
-  docmqtt["server"] = Config.mqtt.server;
-  docmqtt["username"] = Config.mqtt.username;
-  docmqtt["password"] = Config.mqtt.password;
-  docmqtt["topic"] = Config.mqtt.topic;
-  docmqtt["clientid"] = Config.mqtt.clientid;
+  docmqtt["server"] = Default.mqtt.server;
+  docmqtt["username"] = Default.mqtt.username;
+  docmqtt["password"] = Default.mqtt.password;
+  docmqtt["topic"] = Default.mqtt.topic;
+  docmqtt["clientid"] = Default.mqtt.clientid;
   serializeJsonPretty(jsonconfig, Serial); Serial.println();
-  Serial.println("Ready. Halted.");
-  while(true) delay(100);*/
-
-  /*#ifdef SAVECONFIG
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(jsonconfig, config);
-  // Test if parsing succeeds.
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.c_str());
-    return;
-  }
-  serializeJsonPretty(jsonconfig, Serial); Serial.println();
-  Serial.println("Saving config.json");
-  File f = SPIFFS.open("/config.json", "w");
+  //Serial.println("Saving config.json");
+  Serial.println("Saving "CONFIG_FILENAME);
+  //File f = SPIFFS.open("/config2.json", "w");
+  File f = SPIFFS.open("/"CONFIG_FILENAME, "w");
   if (serializeJsonPretty(jsonconfig, f) == 0) {
     Serial.println(F("Failed to write to file"));
   }
   f.close();
   Serial.println("Ready. Halted.");
   while(true) delay(100);
-  #endif*/
+  #endif
   
-  #ifdef USE_CONFIG_FILE
-  Serial.println("Loading config.json");
-  File f = SPIFFS.open("/config.json", "r");
+  //#ifdef USE_CONFIG_FILE
+  Serial.println("Loading "CONFIG_FILENAME);
+  File f = SPIFFS.open("/"CONFIG_FILENAME, "r");
   DeserializationError error = deserializeJson(jsonconfig, f);
   if (error)
     Serial.println(F("Failed to read file, using default configuration"));
@@ -170,7 +161,7 @@ void setup() {
   Serial.print("Config.mqtt.password: \""); Serial.print(Config.mqtt.password); Serial.println("\"");
   Serial.print("Config.mqtt.topic: \""); Serial.print(Config.mqtt.topic); Serial.println("\"");
   Serial.print("Config.mqtt.clientid: \""); Serial.print(Config.mqtt.clientid); Serial.println("\"");
-  #endif
+  //#endif
     
   setup_wifi();
   client.setServer(Config.mqtt.server, 1883);
@@ -231,3 +222,26 @@ void SPIFFS_dir() {
   }
   Serial.println("----------------------");
 }
+
+/*
+  #ifdef SAVE_DEFAULT_CONFIG_TO_FILE
+  JsonObject docwifi = jsonconfig.createNestedObject("wifi");
+  docwifi["ssid"] = Config.wifi.ssid;
+  docwifi["password"] = Config.wifi.password;
+  JsonObject docmqtt = jsonconfig.createNestedObject("mqtt");
+  docmqtt["server"] = Config.mqtt.server;
+  docmqtt["username"] = Config.mqtt.username;
+  docmqtt["password"] = Config.mqtt.password;
+  docmqtt["topic"] = Config.mqtt.topic;
+  docmqtt["clientid"] = Config.mqtt.clientid;
+  serializeJsonPretty(jsonconfig, Serial); Serial.println();
+  Serial.println("Saving config.json");
+  File f = SPIFFS.open("/config2.json", "w");
+  if (serializeJsonPretty(jsonconfig, f) == 0) {
+    Serial.println(F("Failed to write to file"));
+  }
+  f.close();
+  Serial.println("Ready. Halted.");
+  while(true) delay(100);
+  #endif
+ */
