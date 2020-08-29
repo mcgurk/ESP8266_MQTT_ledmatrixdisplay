@@ -136,7 +136,7 @@ void reconnect() {
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  pinMode(TRIGGER_PIN, INPUT);
+  pinMode(TRIGGER_PIN, INPUT_PULLUP);
   Serial.begin(115200);
   //Serial.setDebugOutput(true);
   //while (!Serial) continue;
