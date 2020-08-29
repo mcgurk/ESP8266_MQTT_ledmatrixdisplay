@@ -228,7 +228,7 @@ void loop() {
     docesp["freeHeap"] = ESP.getFreeHeap();
     serializeJson(doc, msg);
     Serial.println(msg);
-    client.publish("lora", msg);
+    client.publish(Config.mqtt.topic, msg);
   }
   
   checkButton(); //WIFIManager
