@@ -42,3 +42,8 @@ GND	| GND
 - https://github.com/mcauser/micropython-max7219
 - http://docs.micropython.org/en/latest/library/framebuf.html
 
+### MQTT
+- https://github.com/micropython/micropython-lib/blob/master/umqtt.simple/example_pub.py
+- https://github.com/micropython/micropython-lib/blob/master/umqtt.simple/example_sub.py
+- https://github.com/micropython/micropython-lib/blob/master/umqtt.robust/example_sub_robust.py
+
