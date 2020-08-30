@@ -1,6 +1,7 @@
 ### Firmware / flashing (ESP32)
-Firmware built with ESP-IDF v4.x, with support for BLE, but no LAN or PPP:
-Generic: https://micropython.org/resources/firmware/esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
+- https://micropython.org/download/esp32/
+- Firmware built with ESP-IDF v4.x, with support for BLE, but no LAN or PPP, Generic: https://micropython.org/resources/firmware/esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
+
 #### Erase flash
 ```
 & $ENV:LOCALAPPDATA\Arduino15\packages\esp32\tools\esptool_py\2.6.1\esptool.exe --chip esp32 --port COM11 erase_flash
