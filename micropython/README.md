@@ -9,7 +9,7 @@ Generic: https://micropython.org/resources/firmware/esp32-idf4-20200830-unstable
 ```
 & $ENV:LOCALAPPDATA\Arduino15\packages\esp32\tools\esptool_py\2.6.1\esptool.exe --chip esp32 --port COM11 --baud 460800 write_flash -z 0x1000 $ENV:USERPROFILE\Downloads\esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
 ```
-### Windows IDE (needs Python):
+### Windows IDE:
 - https://randomnerdtutorials.com/uPyCraftWindows
 - https://github.com/adobe-fonts/source-code-pro/raw/release/TTF/SourceCodePro-Regular.ttf ("Install for all users")
 
