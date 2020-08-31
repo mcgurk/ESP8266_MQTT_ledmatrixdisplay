@@ -11,7 +11,7 @@
 & $ENV:LOCALAPPDATA\Arduino15\packages\esp32\tools\esptool_py\2.6.1\esptool.exe --chip esp32 --port COM11 --baud 460800 write_flash -z 0x1000 $ENV:USERPROFILE\Downloads\esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
 ```
 
-## Setup
+## Setup/Install
 ```
 # ctrl-E
 wssid = 'my_ssid'
@@ -44,6 +44,12 @@ setup.config(wssid, wpasswd, mserver, muser, mpasswd)
 setup.install()
 # ctrl-D
 ```
+### Reinstall files
+```
+import setup
+setup.install()
+```
+
 
 ### Windows IDE:
 - https://randomnerdtutorials.com/uPyCraftWindows
