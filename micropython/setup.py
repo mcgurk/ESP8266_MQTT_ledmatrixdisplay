@@ -30,10 +30,15 @@ def install():
   with open('wifi_config.json') as infile:
     conf = ujson.load(infile)
   import network
+  import utime
   sta_if = network.WLAN(network.STA_IF)
   sta_if.active(True)
   sta_if.connect(conf['ssid'], conf['passwd'])
   del conf
+  if not sta_if.isconnected():
+    print("Waiting for connection...")
+    while not sta_if.isconnected():
+      utime.sleep(1)
   wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/ESP_MQTT_ledmatrixdisplay.py', 'mqtt.py')
   wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/boot.py', 'boot.py')
   wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/utils.py', 'utils.py')
