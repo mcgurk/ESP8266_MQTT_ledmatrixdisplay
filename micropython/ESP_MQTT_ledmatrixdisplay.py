@@ -1,3 +1,4 @@
+import ujson
 import time
 from umqtt.robust import MQTTClient
 
