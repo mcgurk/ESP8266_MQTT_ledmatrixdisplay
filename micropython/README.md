@@ -46,6 +46,14 @@ sta_if.connect(conf['ssid'], conf['passwd'])
 del conf
 ```
 
+### Upload file with repl
+```
+ctrl-E
+code=r'''(paste)'''
+ctrl-D
+open('utils.py','w') as f: f.write(code)
+```
+
 ### webrepl:
 ```
 import webrepl_setup
