@@ -144,3 +144,6 @@ http://micropython.org/webrepl/#192.168.1.185:8266/
 - https://github.com/micropython/micropython-lib/blob/master/umqtt.simple/example_sub.py
 - https://github.com/micropython/micropython-lib/blob/master/umqtt.robust/example_sub_robust.py
 
+## TODO
+- Error handling with received message
+- Maintaining MQTT-connection
