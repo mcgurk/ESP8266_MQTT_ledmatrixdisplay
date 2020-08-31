@@ -21,6 +21,31 @@ sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
 sta_if.connect('ssid', 'password')
 ```
+### Network at boot and credentials from config file
+Save credentials
+```
+# ctrl-E
+import ujson
+conf = {}
+conf['ssid'] = 'my_wifi_ssid'
+conf['passwd'] = 'my_wifi_password'
+with open('wifi_config.json', 'w') as outfile:
+  ujson.dump(conf, outfile)
+del conf
+# ctrl-D
+```
+Add to boot.py
+```
+import ujson
+with open('wifi_config.json') as infile:
+  conf = ujson.load(infile)
+import network
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(True)
+sta_if.connect(conf['ssid'], conf['passwd'])
+del conf
+```
+
 ### webrepl:
 ```
 import webrepl_setup
