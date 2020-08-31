@@ -1,3 +1,15 @@
+### ESP32
+ESP32 | MAX7219
+--- | ---
+5V | VCC
+GND	| GND
+23 MOSI	| DIN
+26 CS	| CS
+18 SCK | CLK
+(19 MISO)
+
+(You can choose pins quite freely. Maybe this uses software SPI)
+
 ## Firmware / flashing (ESP32)
 - https://micropython.org/download/esp32/
 - Firmware built with ESP-IDF v4.x, with support for BLE, but no LAN or PPP, Generic: https://micropython.org/resources/firmware/esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
@@ -121,17 +133,7 @@ import webrepl_setup
 ```
 http://micropython.org/webrepl/#192.168.1.185:8266/
 
-### ESP32
-ESP32 | MAX7219
---- | ---
-5V | VCC
-GND	| GND
-23 MOSI	| DIN
-26 CS	| CS
-18 SCK | CLK
-(19 MISO)
 
-(You can choose pins quite freely. Maybe this uses software SPI)
 
 ### Ledmatrix MAX7219
 - https://github.com/mcauser/micropython-max7219
