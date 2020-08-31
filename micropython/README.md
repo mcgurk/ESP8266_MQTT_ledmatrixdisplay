@@ -1,4 +1,4 @@
-### Firmware / flashing (ESP32)
+## Firmware / flashing (ESP32)
 - https://micropython.org/download/esp32/
 - Firmware built with ESP-IDF v4.x, with support for BLE, but no LAN or PPP, Generic: https://micropython.org/resources/firmware/esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
 
@@ -10,6 +10,31 @@
 ```
 & $ENV:LOCALAPPDATA\Arduino15\packages\esp32\tools\esptool_py\2.6.1\esptool.exe --chip esp32 --port COM11 --baud 460800 write_flash -z 0x1000 $ENV:USERPROFILE\Downloads\esp32-idf4-20200830-unstable-v1.12-694-g836bca995.bin
 ```
+
+## Setup
+```
+# ctrl-E
+import network
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(True)
+sta_if.connect('ssid', 'passwd')
+def wget(url, filename):
+  import upip
+  s = upip.url_open(url)
+  with open(filename,'w') as f:
+    while True:
+      data = s.read(512)
+      if (len(data) < 1):
+        break
+      f.write(data)
+  s.close()
+wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/setup.py', 'setup.py')
+import setup
+setup.config("wssid", "wpasswd", "mserver", "muser", "mpasswd")
+setup.install()
+# ctrl-D
+```
+
 ### Windows IDE:
 - https://randomnerdtutorials.com/uPyCraftWindows
 - https://github.com/adobe-fonts/source-code-pro/raw/release/TTF/SourceCodePro-Regular.ttf ("Install for all users")
