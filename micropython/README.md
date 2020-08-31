@@ -1,4 +1,4 @@
-### ESP32
+## Wiring (ESP32)
 ESP32 | MAX7219
 --- | ---
 5V | VCC
