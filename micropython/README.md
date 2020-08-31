@@ -48,23 +48,23 @@ del conf
 
 ### Upload file with repl
 ```
-ctrl-E
+# ctrl-E
 code=r'''(paste)'''
 with open('utils.py','w') as f:
   f.write(code)
-ctrl-D
+# ctrl-D
 ```
 
 ### Download from web
 ```
-ctrl-E
+# ctrl-E
 import upip
 upip.install('micropython-urllib.urequest')
 import urllib.urequest
 response = urllib.urequest.urlopen('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/utils.py')
 with open('utils.py','w') as f:
   f.write(response.read())
-ctrl-D
+# ctrl-D
 ```
 
 ### webrepl:
