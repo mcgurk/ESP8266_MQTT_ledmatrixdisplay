@@ -51,18 +51,18 @@ setup.install()
 ```
 
 
-### Windows IDE:
+## Windows IDE:
 - https://randomnerdtutorials.com/uPyCraftWindows
 - https://github.com/adobe-fonts/source-code-pro/raw/release/TTF/SourceCodePro-Regular.ttf ("Install for all users")
 
-### Network
+## Network
 ```
 import network
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
 sta_if.connect('ssid', 'password')
 ```
-### Network at boot and credentials from config file
+## Network at boot and credentials from config file
 Save credentials
 ```
 # ctrl-E
@@ -87,7 +87,7 @@ sta_if.connect(conf['ssid'], conf['passwd'])
 del conf
 ```
 
-### Upload file with repl
+## Upload file with repl
 ```
 # ctrl-E
 code=r'''(paste)'''
@@ -96,16 +96,23 @@ with open('utils.py','w') as f:
 # ctrl-D
 ```
 
-### Download from web
+## Download from web
 ```
 # ctrl-E
-import upip
-upip.install('micropython-urllib.urequest')
-import urllib.urequest
-response = urllib.urequest.urlopen('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/utils.py')
-with open('utils.py','w') as f:
-  f.write(response.read())
+def wget(url, filename):
+  import upip
+  s = upip.url_open(url)
+  with open(filename,'w') as f:
+    while True:
+      data = s.read(512)
+      if (len(data) < 1):
+        break
+      f.write(data)
+  s.close()
 # ctrl-D
+```
+```
+wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/utils.py', 'utils.py')
 ```
 
 ### webrepl:
