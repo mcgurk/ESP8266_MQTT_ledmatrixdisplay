@@ -55,6 +55,18 @@ with open('utils.py','w') as f:
 ctrl-D
 ```
 
+### Download from web
+```
+ctrl-E
+import upip
+upip.install('micropython-urllib.urequest')
+import urllib.urequest
+response = urllib.urequest.urlopen('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/utils.py')
+with open('utils.py','w') as f:
+  f.write(response.read())
+ctrl-D
+```
+
 ### webrepl:
 ```
 import webrepl_setup
