@@ -18,9 +18,12 @@ def unload(mod):
   if mod_name in sys.modules:
     del sys.modules[mod_name]
 	
-def run(mod):
+def reimport(mod):
   unload(mod)
   __import__(mod.__name__)
+	
+def run(filename):
+  exec(open(filename).read(),globals())
 
 def mem():
   import micropython
