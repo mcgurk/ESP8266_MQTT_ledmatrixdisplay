@@ -23,7 +23,7 @@ import network
 import utime
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
-sta_if.connect(ssid, passwd)
+sta_if.connect(wssid, wpasswd)
 if not sta_if.isconnected():
     print("Waiting for connection...")
     while not sta_if.isconnected():
