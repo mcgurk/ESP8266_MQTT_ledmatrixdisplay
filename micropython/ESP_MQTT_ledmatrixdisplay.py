@@ -1,6 +1,15 @@
 import ujson
 import time
 from umqtt.robust import MQTTClient
+import max7219
+from machine import Pin, SPI
+
+spi = SPI(1, baudrate=10000000, polarity=1, phase=0, sck=Pin(18), mosi=Pin(23))
+ss = Pin(26, Pin.OUT)
+display = max7219.Matrix8x8(spi, ss, 4)
+display.fill(0)
+display.show()
+display.brightness(0) # 0-15
 
 
 def sub_cb(topic, msg):
