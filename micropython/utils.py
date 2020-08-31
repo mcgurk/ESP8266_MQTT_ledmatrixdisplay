@@ -1,6 +1,7 @@
+import uos
+	
 def ls():
-  import os
-  print(os.listdir())
+  print(uos.listdir())
   
 def cat(filename):
   file = open(filename, "r")
@@ -26,15 +27,12 @@ def mem():
   micropython.mem_info()
 
 def df():
-  import os
-  s = os.statvfs('//')
+  s = uos.statvfs('//')
   return ('{0} MB'.format((s[0]*s[3])/1048576))
 
 def cd(dir):
-  import os
-  os.chdir(dir)
+  uos.chdir(dir)
 
 def md(dir):
-  import os
-  os.mkdir(dir)
+  uos.mkdir(dir)
   
