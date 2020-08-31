@@ -14,10 +14,20 @@
 ## Setup
 ```
 # ctrl-E
+wssid = 'my_ssid'
+wpasswd = 'my_passwd'
+mserver = 'my_mqtt_server'
+muser = 'my_mqtt_username'
+mpasswd = 'my_mqtt_password'
 import network
+import utime
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
-sta_if.connect('ssid', 'passwd')
+sta_if.connect(ssid, passwd)
+if not sta_if.isconnected():
+    print("Waiting for connection...")
+    while not sta_if.isconnected():
+        utime.sleep(1)
 def wget(url, filename):
   import upip
   s = upip.url_open(url)
@@ -30,7 +40,7 @@ def wget(url, filename):
   s.close()
 wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/setup.py', 'setup.py')
 import setup
-setup.config("wssid", "wpasswd", "mserver", "muser", "mpasswd")
+setup.config(wssid, wpasswd, mserver, muser, mpasswd)
 setup.install()
 # ctrl-D
 ```
