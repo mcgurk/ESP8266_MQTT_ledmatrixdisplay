@@ -8,3 +8,4 @@ sta_if.connect(conf['ssid'], conf['passwd'])
 del conf
 
 from utils import *
+#from setup import wget
