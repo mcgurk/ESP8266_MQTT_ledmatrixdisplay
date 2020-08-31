@@ -37,3 +37,4 @@ def install():
   wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/ESP_MQTT_ledmatrixdisplay.py', 'mqtt.py')
   wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/boot.py', 'boot.py')
   wget('https://raw.githubusercontent.com/mcgurk/ESP8266_MQTT_ledmatrixdisplay/master/micropython/utils.py', 'utils.py')
+  wget('https://raw.githubusercontent.com/mcauser/micropython-max7219/master/max7219.py', 'max7219.py')
