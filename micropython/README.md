@@ -50,8 +50,9 @@ del conf
 ```
 ctrl-E
 code=r'''(paste)'''
+with open('utils.py','w') as f:
+  f.write(code)
 ctrl-D
-open('utils.py','w') as f: f.write(code)
 ```
 
 ### webrepl:
