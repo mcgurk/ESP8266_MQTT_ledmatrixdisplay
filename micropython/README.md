@@ -3,10 +3,10 @@ ESP32 | MAX7219
 --- | ---
 5V | VCC
 GND	| GND
-23 MOSI	| DIN
-26 CS	| CS
-18 SCK | CLK
-(19 MISO)
+23 VSPI MOSI | DIN
+18 VSPI CLK | CLK
+5 VSPI CS0	| CS
+(19 VSPI MISO)
 
 (You can choose pins quite freely. Maybe this uses software SPI)
 
