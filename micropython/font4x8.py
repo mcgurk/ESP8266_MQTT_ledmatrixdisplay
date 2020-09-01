@@ -1,3 +1,5 @@
+import framebuf
+
 chr1 = framebuf.FrameBuffer(bytearray([
   0b00000000,
   0b00010000,
