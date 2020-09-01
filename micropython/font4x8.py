@@ -176,4 +176,5 @@ chrF = framebuf.FrameBuffer(bytearray([
   0b00000000 
   ]), 8, 8, framebuf.MONO_HLSB)
 
-font = { "1":chr1, "2":chr2, "3":chr3, "4":chr4, "5":chr5, "6":chr6, "7":chr7, "8":chr8, "9":chr9, "0":chr0, "A":chrA, "B":chrB, "C":chrC, "D":chrD, "E":chrE, "F":chrF }   
+font = { "1":chr1, "2":chr2, "3":chr3, "4":chr4, "5":chr5, "6":chr6, "7":chr7, "8":chr8, "9":chr9, "0":chr0, "A":chrA, "B":chrB, "C":chrC, "D":chrD, "E":chrE, "F":chrF,
+           1:chr1, 2:chr2, 3:chr3, 4:chr4, 5:chr5, 6:chr6, 7:chr7, 8:chr8, 9:chr9, 0:chr0, 10:chrA, 11:chrB, 12:chrC, 13:chrD, 14:chrE, 15:chrF }
