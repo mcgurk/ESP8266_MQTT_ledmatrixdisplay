@@ -136,6 +136,16 @@ http://micropython.org/webrepl/#192.168.1.185:8266/
 
 
 ### Ledmatrix MAX7219
+```
+import max7219
+from machine import Pin, SPI
+spi = SPI(1, baudrate=10000000, polarity=1, phase=0, sck=Pin(18), mosi=Pin(23))
+ss = Pin(5, Pin.OUT)
+display = max7219.Matrix8x8(spi, ss, 4)
+display.fill(0)
+display.text('1234',0,0,1)
+display.show()
+```
 - https://github.com/mcauser/micropython-max7219
 - http://docs.micropython.org/en/latest/library/framebuf.html
 
