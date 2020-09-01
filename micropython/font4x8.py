@@ -162,3 +162,14 @@ chrE = framebuf.FrameBuffer(bytearray([
   0b01110000,
   0b00000000 
   ]), 8, 8, framebuf.MONO_HLSB)
+
+chrF = framebuf.FrameBuffer(bytearray([
+  0b00000000,
+  0b01110000,
+  0b01000000,
+  0b01100000,
+  0b01000000,
+  0b01000000,
+  0b01000000,
+  0b00000000 
+  ]), 8, 8, framebuf.MONO_HLSB)
