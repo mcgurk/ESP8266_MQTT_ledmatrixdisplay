@@ -38,4 +38,8 @@ def cd(dir):
 
 def md(dir):
   uos.mkdir(dir)
+
+def rm(filename)
+  uos.remove(filename)
+
   
