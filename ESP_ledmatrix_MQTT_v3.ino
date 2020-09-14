@@ -187,8 +187,8 @@ void printHelp() {
   String message = String(now()) + " - topic: " + mqtt_topic + ", version:" + VERSION;
   Serial.println(message);
   Serial.println();
-  #ifndef IOTappstory
   Serial.println("1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password");
+  #ifndef IOTappstory
   Serial.println("4 = Give and save MQTT-server, 6 = Give and save MQTT-client name");
   Serial.println("7 = Give and save MQTT-username, 8 = Give and save MQTT-password");
   #endif
@@ -231,11 +231,7 @@ void time_is_set() {
 void setup(){
   settimeofday_cb(time_is_set);
   //implement NTP update of timekeeping (with automatic hourly updates)
-  //configTime(timezone * 3600, dst * 0, "pool.ntp.org", "time.nist.gov");
-  //configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   configTime(MYTZ, "pool.ntp.org", "time.nist.gov");
-  // info to convert UNIX time to local time (including automatic DST update)
-  // setenv("TZ", "EST+5EDT,M3.2.0/2:00:00,M11.1.0/2:00:00", 1);
   // https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/NTP-TZ-DST/NTP-TZ-DST.ino
   
   u8g2.begin();
@@ -255,6 +251,7 @@ void setup(){
     IAS.onModeButtonShortPress([]() {
     Serial.println(F(" If mode button is released, I will enter in firmware update mode."));
     Serial.println(F("*-------------------------------------------------------------------------*"));
+    clockMode = 0;
     u8g2.clearBuffer();  
     u8g2.setFont(u8g2_font_ncenB08_tr);
     u8g2.drawStr(0, 8, "call");
@@ -263,6 +260,7 @@ void setup(){
   IAS.onModeButtonLongPress([]() {
     Serial.println(F(" If mode button is released, I will enter in configuration mode."));
     Serial.println(F("*-------------------------------------------------------------------------*"));
+    clockMode = 0;
     u8g2.clearBuffer();  
     u8g2.setFont(u8g2_font_ncenB08_tr);
     u8g2.drawStr(0, 8, "conf");
@@ -271,14 +269,16 @@ void setup(){
   IAS.onModeButtonVeryLongPress([]() {
     Serial.println(F(" If mode button is released, I won't do anything unless you program me to."));
     Serial.println(F("*-------------------------------------------------------------------------*"));
+    clockMode = 1;
     /* TIP! You can use this callback to put your app on it's own configuration mode */
   });
   IAS.onFirmwareUpdateProgress([](int written, int total){
-      Serial.print(".");
-      u8g2.clearBuffer();  
-      u8g2.setFont(u8g2_font_ncenB08_tr);
-      u8g2.drawStr(0, 8, "Firmware");
-      u8g2.sendBuffer();
+    clockMode = 0;
+    Serial.print(".");
+    u8g2.clearBuffer();  
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 8, "Firmware");
+    u8g2.sendBuffer();
   });
   IAS.preSetDeviceName("ledmatrixESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
   IAS.preSetAutoConfig(false); //go autoconfig-mode only with button
@@ -338,6 +338,9 @@ void setup(){
   Serial.println("Wifi connected.");
   #endif
 
+  Serial.setTimeout(20000);
+  printHelp();
+  
   // if we don't have wifi-connection, wait 30s and reboot
   if (WiFi.status() != WL_CONNECTED) {
     u8g2.clearBuffer();  
@@ -346,7 +349,13 @@ void setup(){
     u8g2.sendBuffer();
     uint32_t s = millis();
     while((millis() - s) < 1000*30) {
-      poll();
+      if (poll()) {
+        u8g2.clearBuffer();  
+        u8g2.setFont(u8g2_font_micro_tr);
+        u8g2.drawStr(0, 8, "Serial");
+        u8g2.sendBuffer();
+        while(1) poll(); //if something goes on in serial, disable 30s timer and listen serial
+      }
     }
     ESP.restart();
   }
@@ -358,10 +367,6 @@ void setup(){
     client.setCallback(callback);
     lastMqttMessage = millis();
   }
-
-  Serial.setTimeout(20000);
-
-  printHelp();
 
   u8g2.clearBuffer();  
   u8g2.setFont(u8g2_font_ncenB08_tr);
@@ -423,7 +428,7 @@ void loop() {
   poll();
 }
 
-void poll() {
+uint8_t poll() {
   static uint32_t lastFrame = 0;
   yield();
   frame = (millis() - millisAtStart) >> 5;
@@ -431,10 +436,10 @@ void poll() {
     pollScroller();
     lastFrame = frame;
   }
-  pollSerial();
   #ifdef IOTappstory
   IAS.loop();                                // this routine handles the calling home on the configured itnerval as well as reaction of the Flash button. If short press: update of skethc, long press: Configuration
   #endif
+  return pollSerial();
 }
 
 #define flush_inbuf delay(100); while(Serial.available()) { Serial.read(); yield(); }
@@ -476,8 +481,8 @@ void saveSetting(char *filename, char *data) {
   f.close();
 }
   
-void pollSerial() {
-  if (!Serial.available()) return;
+uint8_t pollSerial() {
+  if (!Serial.available()) return 0;
   char token;
   token = readNextChar();
   switch(token) { 
@@ -501,6 +506,10 @@ void pollSerial() {
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, ssid_passwd);
         Serial.println("SSID and Wifi-password saved");
+        #ifdef IOTappstory
+        IAS.preSetWifi(ssid, ssid_passwd);
+        ESP.restart();
+        #endif
       } else Serial.println("SSID and Wifi-password NOT SAVED");
       break;
     case '4':
@@ -537,4 +546,5 @@ void pollSerial() {
       break;
   }
   Serial.println();
+  return 1;
 }
