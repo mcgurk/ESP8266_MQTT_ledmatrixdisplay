@@ -3,6 +3,25 @@
 // (ESP32: https://github.com/me-no-dev/AsyncTCP)
 // https://github.com/me-no-dev/ESPAsyncWebServer
 
+// https://github.com/olikraus/u8g2/issues/105
+// https://github.com/olikraus/u8g2/raw/master/tools/font/fony/Fony-wip.zip
+// https://github.com/olikraus/u8g2/raw/master/tools/font/bdfconv/bdfconv.exe
+// .\bdfconv C:\temp\3x5.bdf -f 1 -n oma_3x5_tn -o c:\temp\3x5.c
+
+const uint8_t bdf_font[101] = {
+  11,0,2,3,2,3,1,4,4,3,5,0,4,9,0,9,
+  0,0,0,0,0,0,72,48,7,55,51,148,138,0,49,6,
+  54,115,83,6,50,6,55,51,99,57,51,6,55,51,35,3,
+  52,7,55,51,145,68,38,53,6,55,51,228,72,54,6,55,
+  51,36,69,55,8,55,51,99,42,140,0,56,6,55,51,84,
+  69,57,6,55,51,20,73,58,6,109,43,81,0,0,0,0,
+  4,255,255,0,0};
+
+/*const uint8_t oma_3x5_tn[92] = 
+  "\60:\1\1\370\210\370\0\0\0\0\0\20\370\0\0\0\0\0\0\350\250\270\0\0\0\0\0\250\250\370\0"
+  "\0\0\0\0\70 \370\0\0\0\0\0\270\250\350\0\0\0\0\0\370\250\350\0\0\0\0\0\10\310\70\0"
+  "\0\0\0\0\370\250\370\0\0\0\0\0\270\250\370\0\0\0\0\0P\0\0\0\0\0\0";*/
+  
 #include <ESP8266WiFi.h>
 #include <coredecls.h>                  // settimeofday_cb()
 #include <TZ.h>
@@ -350,10 +369,6 @@ void setup(){
     uint32_t s = millis();
     while((millis() - s) < 1000*30) {
       if (poll()) {
-        u8g2.clearBuffer();  
-        u8g2.setFont(u8g2_font_micro_tr);
-        u8g2.drawStr(0, 8, "Serial");
-        u8g2.sendBuffer();
         while(1) poll(); //if something goes on in serial, disable 30s timer and listen serial
       }
     }
@@ -392,10 +407,16 @@ void loop() {
     if (timeStatus) {
       scrollerMode = 0;
       u8g2.clearBuffer();
-      u8g2.setFont(u8g2_font_micro_tr);
+      //u8g2.setFont(u8g2_font_micro_tr);
+      //u8g2.setFont(u8g2_font_blipfest_07_tr); //best...
+      //u8g2.setFont(u8g2_font_trixel_square_tr);
+      u8g2.setFont(bdf_font);
+      //u8g2.setFont(oma_3x5_tn);
       time_t epoch_now = now();
       tm *local = localtime(&epoch_now);
-      u8g2.drawStr(0, 8, getFormattedTime(local).c_str());
+      //u8g2.drawStr(2, 7, getFormattedTime(local).c_str());
+      //u8g2.drawStr(2, 6, getFormattedTime(local).c_str());
+      u8g2.drawStr(2, 10, getFormattedTime(local).c_str());
       u8g2.sendBuffer();
     } else {
       u8g2.clearBuffer();
@@ -483,6 +504,10 @@ void saveSetting(char *filename, char *data) {
   
 uint8_t pollSerial() {
   if (!Serial.available()) return 0;
+  u8g2.clearBuffer();  
+  u8g2.setFont(u8g2_font_micro_tr);
+  u8g2.drawStr(0, 8, "Serial");
+  u8g2.sendBuffer();
   char token;
   token = readNextChar();
   switch(token) { 
@@ -548,3 +573,4 @@ uint8_t pollSerial() {
   Serial.println();
   return 1;
 }
+
