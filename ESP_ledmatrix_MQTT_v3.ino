@@ -244,7 +244,7 @@ void printHelp() {
   #ifdef IOTappstory
   Serial.println("- a/A = call home / update firmware(IOTappstory)");
   #endif
-  Serial.println("(e.g. sHi! or ia or t or r12342234323442345234623472348234)");
+  Serial.println("(e.g. sHi! or ia or c or r12342234323442345234623472348234)");
   Serial.println("(Uppercase letter starts/resets 2h mqtt-timeout timer)");
   Serial.println();
   Serial.println("-If there is mqtt-timeout timer enabled and no mqtt messages in 2 hours, right bottom pixel blinks.");
