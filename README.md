@@ -11,13 +11,13 @@
 
 1 = Give SSID, 2 = Give Wifi-password, 3 = Save SSID and Wifi-password
 
-4 = Give and save MQTT-server, 6 = Give and save MQTT-client name
+(4 = Give and save MQTT-server, 6 = Give and save MQTT-client name)
 
-7 = Give and save MQTT-username, 8 = Give and save MQTT-password
+(7 = Give and save MQTT-username, 8 = Give and save MQTT-password)
 
 9 = Reset
 
-C = Call home / update firmware (IOTappstory)
+A = Call home / update firmware (IOTappstory)
 
 
 ## MQTT
@@ -25,7 +25,8 @@ C = Call home / update firmware (IOTappstory)
 ### commands
 - s/S = string
 - i/I = intensity (0...f)
-- t/T = internet clock
+- c/C = clock
+- t/T = temperature
 - r/R = raw (4 bytes / line, 8 lines -> 32 bytes)
 
 ```
@@ -60,7 +61,7 @@ mosquitto_pub -d -h localhost -t /ledmatrix/mqtt_client_name -m "sHi!" -u userna
 
 ## IOTAppsStory
 
-- IOTAppStory-ESP (2.0.1 22.1.2019) (2.0.0 8.9.2018)
+- IOTAppStory-ESP (2.1.0-RC3 15.9.2020) (2.0.1 22.1.2019) (2.0.0 8.9.2018)
 - https://iotappstory.com
 - https://github.com/iotappstory/ESP-Library
 - https://iotappstory.com/wiki/arduino-esp/library-api-20
