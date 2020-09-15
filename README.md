@@ -87,3 +87,33 @@ Wifi and MQTT-information are given in configuration mode.
 ```
 & $ENV:LOCALAPPDATA\Arduino15\packages\esp8266\tools\esptool\0.4.13\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM3 -ca 0x00000 -cf $ENV:USERPROFILE\Downloads\ESP_ledmatrix_MQTT_v2.ino.nodemcu.bin
 ```
+
+## Image from NodeRED
+```
+var image =
+`
+------xx-------x--------------xx
+--------------------------------
+--------------------------------
+--------------------------------
+--------------------------------
+--------------------------------
+--xx----------------------------
+xx------------------------------
+`
+
+var output = "r";
+var p = 0;
+var bit = 0;
+var byte = 0;
+while (p < image.length) {
+  data = image[p++];
+  if (data != '-' && data != 'x') continue;
+  if (data == 'x') byte = byte | 1;
+  if (bit == 7)  { output += String.fromCharCode(byte); bit = 0; byte = 0; } else { byte = byte << 1; bit++; }
+}
+  
+//msg.retain = true;
+msg.payload = new Buffer(output, "ascii");
+return msg;
+```
