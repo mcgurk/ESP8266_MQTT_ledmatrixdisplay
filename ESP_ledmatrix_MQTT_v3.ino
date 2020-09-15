@@ -8,7 +8,7 @@
 // https://github.com/olikraus/u8g2/raw/master/tools/font/bdfconv/bdfconv.exe
 // .\bdfconv C:\temp\3x5.bdf -f 1 -n oma_3x5_tn -o c:\temp\3x5.c
 
-const uint8_t bdf_font[101] = {
+const uint8_t oma_3x5_tn[101] = {
   11,0,2,3,2,3,1,4,4,3,5,0,4,9,0,9,
   0,0,0,0,0,0,72,48,7,55,51,148,138,0,49,6,
   54,115,83,6,50,6,55,51,99,57,51,6,55,51,35,3,
@@ -17,11 +17,6 @@ const uint8_t bdf_font[101] = {
   69,57,6,55,51,20,73,58,6,109,43,81,0,0,0,0,
   4,255,255,0,0};
 
-/*const uint8_t oma_3x5_tn[92] = 
-  "\60:\1\1\370\210\370\0\0\0\0\0\20\370\0\0\0\0\0\0\350\250\270\0\0\0\0\0\250\250\370\0"
-  "\0\0\0\0\70 \370\0\0\0\0\0\270\250\350\0\0\0\0\0\370\250\350\0\0\0\0\0\10\310\70\0"
-  "\0\0\0\0\370\250\370\0\0\0\0\0\270\250\370\0\0\0\0\0P\0\0\0\0\0\0";*/
-  
 #include <ESP8266WiFi.h>
 #include <coredecls.h>                  // settimeofday_cb()
 #include <TZ.h>
@@ -61,7 +56,7 @@ uint32_t mqttTimeoutLimit = 1000UL*3600UL*2UL; // ms
 uint8_t mqttTimeoutTriggered = 0;
 uint32_t millisAtStart;
 
-#define TOPIC "ledmatrix/"
+#define TOPIC "ledmatrix"
 char mqtt_server[100+1];
 char mqtt_username[30+1];
 char mqtt_passwd[30+1];
@@ -109,22 +104,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (token != 'r') { //print payload (if now "raw")
     for (int i = 0; i < length; i++) {
       Serial.print((char)payload[i]);
-      //Serial.println((char*)payload);
     }
   }
   Serial.println("\"");
   memmove(payload, payload+1, length-1); payload[length-1] = '\0'; //chop token and make char str
   if (token == 's' || token == 'S') { // "string"
     clockMode = 0;
-    //Serial.print(", ");
-    //Serial.print((char*)&payload[1]);
-    /*ledMatrix.clearOffscreen();  //****************************************************
-    for (int i = 0; i < length-1; i++) {
-      if (i >= 4) break;
-      ledMatrix.drawChar((char)payload[i+1], i);
-      Serial.print((char)payload[i+1]);
-    }
-    ledMatrix.commit();*/
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_helvB08_tr);
     u8g2.drawStr(0, 8, (char*)payload);
@@ -138,10 +123,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     sprintf(buf, "%4.1f", fabs(f));
     Serial.println(buf);
     u8g2.clearBuffer();
-    //u8g2.drawPixel(16,7);
-    //u8g2.drawLine(16,0,16,7);
     u8g2.setFont(u8g2_font_helvB08_tr); //8x5 bold
-    //u8g2.drawStr(4, 8, (char*)buf);
     if (f < 10 && f > -10) {
       u8g2.drawStr(7, 8, (char*)buf);
       if (f < 0) { u8g2.drawLine(6,3,8,3); u8g2.drawLine(6,4,8,4); }
@@ -153,17 +135,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     u8g2.drawBox(CX+1,0,2,2);
     u8g2.drawStr(CX+3, 8, "C");
     u8g2.sendBuffer();
-    /*u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_helvB08_tr); //8x5 bold
-    u8g2.drawLine(0,3,2,3);
-    u8g2.drawLine(0,4,2,4);
-    u8g2.drawStr(4, 8, "21"); 
-    u8g2.drawPixel(16,7);
-    u8g2.drawStr(18, 8, "6");
-    #define CX 24
-    u8g2.drawBox(CX,0,2,2);
-    u8g2.drawStr(CX+3, 8, "C");
-    u8g2.sendBuffer();*/
   }
   if (token == 'i' || token == 'I') { // intensity
     uint8_t br = payload[0];
@@ -186,8 +157,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
   #endif
   if (token == 'r' || token == 'R') { // "raw"
     clockMode = 0;
-    /*ledMatrix.setOffscreen(payload+1); // **********************************************
-    ledMatrix.commit();*/
+    u8g2.clearBuffer();
+    u8g2.drawBitmap(0, 0, 4, 8, payload);
+    u8g2.sendBuffer();
   }
   Serial.println();
   if (token == 'S' || token == 'I' || token == 'T' || token == 'R' || token == 'P' || token == 'C') mqttTimeoutEnabled = 1;
@@ -196,13 +168,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void mqttStatus(char* statusmessage) { // don't call from getNtpTime() because now()!!!
   if(client.connected() && mqttEnabled) {
-    //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address) + " - " + status;
-    uint32_t ti = now(); // UTC epoch
-    sprintf(mqtt_message, "%i - topic: %s, %s - %s", ti, mqtt_topic, VERSION, statusmessage);
+    sprintf(mqtt_message, "%i - topic: %s, %s - %s", now(), mqtt_topic, VERSION, statusmessage);
     client.publish(mqtt_statustopic, mqtt_message, true); //retain
-    //message = String(now()) + " - topic: " + mqtt_topic + " - " + status;
-    //String topic = String(mqtt_topic) + "/status";
-    //client.publish(topic.c_str(), message.c_str(), true); //retain
   }
 }
 
@@ -254,7 +221,6 @@ uint8_t loadSetting(char *filename, char *data, uint16_t maxsize) {
 }
 
 void printHelp() {
-  //String message = String(now()) + " - topic: " + String(mqtt_topic) + ", clientname: " + String(mqtt_clientname) + ", address: " + String(address);
   String message = String(now()) + " - topic: " + mqtt_topic + ", version:" + VERSION;
   Serial.println(message);
   Serial.println();
@@ -355,10 +321,7 @@ void setup(){
   IAS.preSetDeviceName("ledmatrixESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
   IAS.preSetAutoConfig(false); //go autoconfig-mode only with button
     
-  //char *ms, *mu, *mp, *mc;
   char *ms = "mqttserver", *mu = "username", *mp = "passwd", *mc = "clientname";
-  //char _ms[101], _mu[31], _mp[31], _mc[31];
-  //char *ms = _ms, *mu = _mu, *mp = _mp, *mc = _mc;
   IAS.addField(ms, "MQTT server", 100);
   IAS.addField(mu, "MQTT username", 30);
   IAS.addField(mp, "MQTT passwd", 30);
@@ -372,8 +335,9 @@ void setup(){
   strcpy(mqtt_username, mu);
   strcpy(mqtt_passwd, mp);
   strcpy(mqtt_clientname, mc);
-  sprintf(mqtt_topic, "%s%s", TOPIC, mqtt_clientname);
-  sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
+  sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
+  //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statustopic, "%s", TOPIC);
   /*Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
   Serial.print(F("mqtt_server: \"")); Serial.print(mqtt_server); Serial.println(F("\"")); 
   Serial.print(F("mqtt_topic: \"")); Serial.print(mqtt_topic); Serial.println(F("\"")); 
@@ -400,8 +364,9 @@ void setup(){
   uint8_t result = loadSetting("/mqtt_server.txt", mqtt_server, 100);
   if (result == 1 && mqtt_server[0] != '\0') mqttEnabled = 1;
   loadSetting("/mqtt_clientname.txt", mqtt_clientname, 30);
-  sprintf(mqtt_topic, "%s%s", TOPIC, mqtt_clientname);
-  sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
+  sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
+  //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statustopic, "%s", TOPIC);
   loadSetting("/mqtt_username.txt", mqtt_username, 30);
   loadSetting("/mqtt_passwd.txt", mqtt_passwd, 30);
   Serial.println();
@@ -463,15 +428,9 @@ void loop() {
     if (timeStatus) {
       scrollerMode = 0;
       u8g2.clearBuffer();
-      //u8g2.setFont(u8g2_font_micro_tr);
-      //u8g2.setFont(u8g2_font_blipfest_07_tr); //best...
-      //u8g2.setFont(u8g2_font_trixel_square_tr);
-      u8g2.setFont(bdf_font);
-      //u8g2.setFont(oma_3x5_tn);
+      u8g2.setFont(oma_3x5_tn);
       time_t epoch_now = now();
       tm *local = localtime(&epoch_now);
-      //u8g2.drawStr(2, 7, getFormattedTime(local).c_str());
-      //u8g2.drawStr(2, 6, getFormattedTime(local).c_str());
       u8g2.drawStr(2, 10, getFormattedTime(local).c_str());
       u8g2.sendBuffer();
     } else {
@@ -494,14 +453,6 @@ void loop() {
     }
   }
 
-  //if NTP time has failed
-  //if (timeStatus() == timeNeedsSync) {
-  /*if (ntpErrorCnt > 23) {
-    ledMatrix.writePixel(0, 7, (millis() >> 6) & 1);
-    ledMatrix.commit();
-    delay(200);
-  }*/
- 
   poll();
 }
 
