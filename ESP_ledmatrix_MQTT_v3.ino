@@ -317,6 +317,14 @@ void setup(){
     u8g2.setFont(u8g2_font_ncenB08_tr);
     u8g2.drawStr(0, 8, "Firmware");
     u8g2.sendBuffer();
+    Serial.print("Progess: "); Serial.print(written); Serial.print("/"); Serial.println(total);
+    char buf[100];
+    sprintf(buf, "Updating firmware: %i/%i", written, total);
+    mqttStatus(buf);
+  });
+  IAS.onFirmwareUpdateCheck([](){
+    Serial.println("***FirmwareUpdateCheck");
+    mqttStatus("Firmware check");
   });
   IAS.preSetDeviceName("ledmatrixESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
   IAS.preSetAutoConfig(false); //go autoconfig-mode only with button
@@ -337,7 +345,8 @@ void setup(){
   strcpy(mqtt_clientname, mc);
   sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
   //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
-  sprintf(mqtt_statustopic, "%s", TOPIC);
+  //sprintf(mqtt_statustopic, "%s", TOPIC);
+  sprintf(mqtt_statustopic, "%s/status/%s", TOPIC, mqtt_clientname);
   /*Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
   Serial.print(F("mqtt_server: \"")); Serial.print(mqtt_server); Serial.println(F("\"")); 
   Serial.print(F("mqtt_topic: \"")); Serial.print(mqtt_topic); Serial.println(F("\"")); 
@@ -366,7 +375,8 @@ void setup(){
   loadSetting("/mqtt_clientname.txt", mqtt_clientname, 30);
   sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
   //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
-  sprintf(mqtt_statustopic, "%s", TOPIC);
+  //sprintf(mqtt_statustopic, "%s", TOPIC);
+  sprintf(mqtt_statustopic, "%s/status/%s", TOPIC, mqtt_clientname);
   loadSetting("/mqtt_username.txt", mqtt_username, 30);
   loadSetting("/mqtt_passwd.txt", mqtt_passwd, 30);
   Serial.println();
