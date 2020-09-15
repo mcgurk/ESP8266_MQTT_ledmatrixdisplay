@@ -104,16 +104,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
   mqttTimeoutTriggered = 0;
   Serial.print("Message arrived [");
   Serial.print(topic);
-  Serial.print("]: ");
+  Serial.print("]: \"");
   char token = payload[0];
   if (token != 'r') { //print payload (if now "raw")
     for (int i = 0; i < length; i++) {
       Serial.print((char)payload[i]);
+      //Serial.println((char*)payload);
     }
   }
+  Serial.println("\"");
+  memmove(payload, payload+1, length-1); payload[length-1] = '\0'; //chop token and make char str
   if (token == 's' || token == 'S') { // "string"
     clockMode = 0;
-    Serial.print(", ");
+    //Serial.print(", ");
+    //Serial.print((char*)&payload[1]);
     /*ledMatrix.clearOffscreen();  //****************************************************
     for (int i = 0; i < length-1; i++) {
       if (i >= 4) break;
@@ -121,21 +125,62 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.print((char)payload[i+1]);
     }
     ledMatrix.commit();*/
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_helvB08_tr);
+    u8g2.drawStr(0, 8, (char*)payload);
+    u8g2.sendBuffer();
+  }
+  if (token == 't' || token == 'T') { // "temperature"
+    clockMode = 0;
+    float f = atof((char*)payload);
+    Serial.println(f);
+    char buf[10];
+    sprintf(buf, "%4.1f", fabs(f));
+    Serial.println(buf);
+    u8g2.clearBuffer();
+    //u8g2.drawPixel(16,7);
+    //u8g2.drawLine(16,0,16,7);
+    u8g2.setFont(u8g2_font_helvB08_tr); //8x5 bold
+    //u8g2.drawStr(4, 8, (char*)buf);
+    if (f < 10 && f > -10) {
+      u8g2.drawStr(7, 8, (char*)buf);
+      if (f < 0) { u8g2.drawLine(6,3,8,3); u8g2.drawLine(6,4,8,4); }
+    } else {
+      u8g2.drawStr(4, 8, (char*)buf);       
+      if (f < 0) { u8g2.drawLine(0,3,2,3); u8g2.drawLine(0,4,2,4); }
+    }
+    #define CX 24
+    u8g2.drawBox(CX+1,0,2,2);
+    u8g2.drawStr(CX+3, 8, "C");
+    u8g2.sendBuffer();
+    /*u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_helvB08_tr); //8x5 bold
+    u8g2.drawLine(0,3,2,3);
+    u8g2.drawLine(0,4,2,4);
+    u8g2.drawStr(4, 8, "21"); 
+    u8g2.drawPixel(16,7);
+    u8g2.drawStr(18, 8, "6");
+    #define CX 24
+    u8g2.drawBox(CX,0,2,2);
+    u8g2.drawStr(CX+3, 8, "C");
+    u8g2.sendBuffer();*/
   }
   if (token == 'i' || token == 'I') { // intensity
-    uint8_t br = payload[1];
-    /*if (br > 47 && br < 58) ledMatrix.setIntensity(br-'0'); //*****************************************
-    if (br > 64 && br < 71) ledMatrix.setIntensity(br-'A'+10);
-    if (br > 96 && br < 103) ledMatrix.setIntensity(br-'a'+10);*/
+    uint8_t br = payload[0];
+    uint8_t i;
+    if (br > 47 && br < 58) i = br-'0';
+    if (br > 64 && br < 71) i = br-'A'+10;
+    if (br > 96 && br < 103) i = br-'a'+10;
+    u8g2.setContrast(i << 4);
   }
-  if (token == 't' || token == 'T') { // clock
+  if (token == 'c' || token == 'C') { // clock
     clockMode = 1;
   }
   if (token == 'p' || token == 'P') { // ping
     mqttStatus("ping");
   }
   #ifdef IOTappstory
-  if (token == 'c' || token == 'C') { // IOTappstory call home
+  if (token == 'a' || token == 'A') { // IOTappstory call home
     IAS.callHome();
   }
   #endif
@@ -145,8 +190,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     ledMatrix.commit();*/
   }
   Serial.println();
-  if (token == 'S' || token == 'I' || token == 'T' || token == 'R' || token == 'P') mqttTimeoutEnabled = 1;
-  if (token == 's' || token == 'i' || token == 't' || token == 'r' || token == 'p') mqttTimeoutEnabled = 0;
+  if (token == 'S' || token == 'I' || token == 'T' || token == 'R' || token == 'P' || token == 'C') mqttTimeoutEnabled = 1;
+  if (token == 's' || token == 'i' || token == 't' || token == 'r' || token == 'p' || token == 'c') mqttTimeoutEnabled = 0;
 }
 
 void mqttStatus(char* statusmessage) { // don't call from getNtpTime() because now()!!!
@@ -162,6 +207,10 @@ void mqttStatus(char* statusmessage) { // don't call from getNtpTime() because n
 }
 
 void reconnect() {
+  u8g2.clearBuffer();  
+  u8g2.setFont(u8g2_font_ncenB08_tr);
+  u8g2.drawStr(0, 8, "MQTT");
+  u8g2.sendBuffer();
   Serial.print("Attempting MQTT connection...");
   if (mqtt_clientname[0] == '\0') mqtt_clientname[0] = 'a';
   // Attempt to connect
@@ -180,7 +229,10 @@ void reconnect() {
     Serial.print("failed, rc=");
     Serial.print(client.state());
     Serial.println(" try again in 2 seconds");
-    delay(2000); //!!!
+    uint32_t s=millis();
+    while ((millis()-s) < 2000) {
+      poll();
+    }
   }
 }
 
@@ -212,18 +264,19 @@ void printHelp() {
   Serial.println("7 = Give and save MQTT-username, 8 = Give and save MQTT-password");
   #endif
   #ifdef IOTappstory
-  Serial.println("C = Call home / update firmware (IOTappstory)");
+  Serial.println("A = Call home / update firmware (IOTappstory)");
   #endif
   Serial.println("9 = Reset, any other = exit");
   Serial.println();
   Serial.println("MQTT commands:");
   Serial.println("- s/S = string");
   Serial.println("- i/I = intensity (0...f)");
-  Serial.println("- t/T = internet clock");
+  Serial.println("- c/C = clock");
+  Serial.println("- t/T = temperature");
   Serial.println("- r/R = raw (4 bytes / line, 8 lines)");
   Serial.println("- p/P = ping (reply in \".../status\"-topic)");
   #ifdef IOTappstory
-  Serial.println("- c/C = call home / update firmware(IOTappstory)");
+  Serial.println("- a/A = call home / update firmware(IOTappstory)");
   #endif
   Serial.println("(e.g. sHi! or ia or t or r12342234323442345234623472348234)");
   Serial.println("(Uppercase letter starts/resets 2h mqtt-timeout timer)");
@@ -302,7 +355,10 @@ void setup(){
   IAS.preSetDeviceName("ledmatrixESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
   IAS.preSetAutoConfig(false); //go autoconfig-mode only with button
     
-  char *ms, *mu, *mp, *mc;
+  //char *ms, *mu, *mp, *mc;
+  char *ms = "mqttserver", *mu = "username", *mp = "passwd", *mc = "clientname";
+  //char _ms[101], _mu[31], _mp[31], _mc[31];
+  //char *ms = _ms, *mu = _mu, *mp = _mp, *mc = _mc;
   IAS.addField(ms, "MQTT server", 100);
   IAS.addField(mu, "MQTT username", 30);
   IAS.addField(mp, "MQTT passwd", 30);
@@ -558,7 +614,7 @@ uint8_t pollSerial() {
       saveSetting("/mqtt_passwd.txt", mqtt_passwd);
       break;
     #ifdef IOTappstory
-    case 'C':
+    case 'A':
       IAS.callHome();
       break;
     #endif
