@@ -117,3 +117,33 @@ while (p < image.length) {
 msg.payload = new Buffer(output, "ascii");
 return msg;
 ```
+
+## Node-Red Google Sheet
+```
+var image = [];
+for (var y = 0; y < 8; y++)
+  for(var x = 0; x < 32; x++) {
+    //image += '-';
+    image.push('-');
+    if(typeof msg.payload[y] !== 'undefined')
+      if(typeof msg.payload[y][x] !== 'undefined') {
+        var data = msg.payload[y][x];
+        if(data !== "") image[image.length-1] = 'x';
+      }
+  }
+
+var output = "r";
+var p = 0;
+var bit = 0;
+var byte = 0;
+while (p < image.length) {
+  data = image[p++];
+  if (data != '-' && data != 'x') continue;
+  if (data == 'x') byte = byte | 1;
+  if (bit == 7)  { output += String.fromCharCode(byte); bit = 0; byte = 0; } else { byte = byte << 1; bit++; }
+}
+  
+//msg.retain = true;
+msg.payload = new Buffer(output, "ascii");
+return msg;
+```
