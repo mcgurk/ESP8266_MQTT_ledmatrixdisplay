@@ -123,7 +123,6 @@ return msg;
 var image = [];
 for (var y = 0; y < 8; y++)
   for(var x = 0; x < 32; x++) {
-    //image += '-';
     image.push('-');
     if(typeof msg.payload[y] !== 'undefined')
       if(typeof msg.payload[y][x] !== 'undefined') {
