@@ -22,8 +22,9 @@ const uint8_t oma_3x5_tn[101] = {
 #include <TZ.h>
 
 #define IOTappstory
+#define TLS
 
-#define VERSION "V3.0.0"
+#define VERSION "V3.0.1"
 
 #define MYTZ TZ_Europe_Helsinki
 
@@ -43,7 +44,11 @@ U8G2_MAX7219_32X8_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ D5, /* data=*/ D7, /* cs
 //MQTT (PubSubClient) + SPIFFS 
 #include <PubSubClient.h> // from library manager (https://pubsubclient.knolleary.net/)
 #include <FS.h>
+#ifdef TLS
+WiFiClientSecure espClient;     // <-- Change #1: Secure connection to MQTT Server
+#else
 WiFiClient espClient;
+#endif
 PubSubClient client(espClient);
 uint8_t mqttEnabled = 0;
 
@@ -174,9 +179,10 @@ void mqttStatus(char* statusmessage) { // don't call from getNtpTime() because n
 }
 
 void reconnect() {
-  u8g2.clearBuffer();  
-  u8g2.setFont(u8g2_font_ncenB08_tr);
-  u8g2.drawStr(0, 8, "MQTT");
+  //u8g2.clearBuffer();  
+  //u8g2.setFont(u8g2_font_ncenB08_tr);
+  //u8g2.drawStr(0, 8, "MQTT");
+  u8g2.drawPixel(0,7);
   u8g2.sendBuffer();
   Serial.print("Attempting MQTT connection...");
   if (mqtt_clientname[0] == '\0') mqtt_clientname[0] = 'a';
@@ -192,6 +198,10 @@ void reconnect() {
     // ... and resubscribe
     client.subscribe(mqtt_topic);
     mqttStatus("connected");
+    u8g2.setDrawColor(0);
+    u8g2.drawPixel(0,7);
+    u8g2.sendBuffer();
+    u8g2.setDrawColor(1);
   } else {
     Serial.print("failed, rc=");
     Serial.print(client.state());
@@ -388,6 +398,10 @@ void setup(){
   Serial.println("Wifi connected.");
   #endif
 
+  #ifdef TLS
+  espClient.setInsecure(); // connection will be encrypted but it will accept any server certificate without checking.
+  #endif
+  
   Serial.setTimeout(20000);
   printHelp();
   
@@ -409,7 +423,11 @@ void setup(){
   //don't enable MQTT if server is empty or only one character
   if (mqtt_server[0] != '\0' && mqtt_server[1] != '\0') mqttEnabled = 1;
   if (mqttEnabled) {
+    #ifdef TLS
+    client.setServer(mqtt_server, 8883);
+    #else
     client.setServer(mqtt_server, 1883);
+    #endif
     client.setCallback(callback);
     lastMqttMessage = millis();
   }
@@ -590,4 +608,3 @@ uint8_t pollSerial() {
   Serial.println();
   return 1;
 }
-
