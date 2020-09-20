@@ -2,7 +2,7 @@
 
 ## Button
 
-- NodeMCU: Flash button (GPIO0)
+- NodeMCU: Flash button (GPIO0/D3 to GND)
 - over 0,5s, under 4s: Call home
 - over 4s, under 10s: Configuration mode
 - over 10s: nothing
