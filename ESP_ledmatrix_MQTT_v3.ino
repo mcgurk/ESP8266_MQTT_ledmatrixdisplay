@@ -22,9 +22,9 @@ const uint8_t oma_3x5_tn[101] = {
 #include <TZ.h>
 
 #define IOTappstory
-#define TLS
+//#define TLS
 
-#define VERSION "V3.0.1"
+#define VERSION "V3.0.2"
 
 #define MYTZ TZ_Europe_Helsinki
 
@@ -122,10 +122,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   if (token == 't' || token == 'T') { // "temperature"
     clockMode = 0;
-    float f = atof((char*)payload);
+    char* pEnd;
+    float f = strtof ((char*)payload, &pEnd);
+    //float f = atof((char*)payload);
     Serial.println(f);
-    char buf[10];
-    sprintf(buf, "%4.1f", fabs(f));
+    char buf[10] = "--.-\0";
+    if (pEnd != ((char*)payload)) sprintf(buf, "%4.1f", fabs(f));
+    /*if (pEnd != ((char*)payload)) {
+      sprintf(buf, "%4.1f", fabs(f));
+    } else {
+      sprintf(buf, "--.-");      
+    }*/
     Serial.println(buf);
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_helvB08_tr); //8x5 bold
