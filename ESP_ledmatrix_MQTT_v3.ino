@@ -24,7 +24,7 @@ const uint8_t oma_3x5_tn[101] = {
 #define IOTappstory
 //#define TLS
 
-#define VERSION "V3.0.2"
+#define VERSION "V3.0.3"
 
 #define MYTZ TZ_Europe_Helsinki
 
@@ -68,6 +68,7 @@ char mqtt_passwd[30+1];
 char mqtt_clientname[30+1];
 char mqtt_topic[20+30+1];
 char mqtt_statustopic[20+30+20+1];
+char mqtt_statetopic[20+30+20+1];
 char mqtt_message[15+20+30+10+50]; //time+topic+clientname+version+status
 File f;
 
@@ -178,9 +179,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (token == 's' || token == 'i' || token == 't' || token == 'r' || token == 'p' || token == 'c') mqttTimeoutEnabled = 0;
 }
 
-void mqttStatus(char* statusmessage) { // don't call from getNtpTime() because now()!!!
+void mqttStatus(char* statusmessage) {
   if(client.connected() && mqttEnabled) {
-    sprintf(mqtt_message, "%i - topic: %s, %s - %s", now(), mqtt_topic, VERSION, statusmessage);
+    time_t t = now();
+    char *date = ctime(&t);
+    sprintf(mqtt_message, "%i - %s - topic: %s, %s - %s", t, date, mqtt_topic, VERSION, statusmessage);
     client.publish(mqtt_statustopic, mqtt_message, true); //retain
   }
 }
@@ -197,14 +200,16 @@ void reconnect() {
   uint8_t result;
   //don't enable authentication if username is empty or only one character
   if (mqtt_username[0] != '\0' && mqtt_username[1] != '\0')
-    result = client.connect(mqtt_clientname, mqtt_username, mqtt_passwd);
+    //result = client.connect(mqtt_clientname, mqtt_username, mqtt_passwd);
+    result = client.connect(mqtt_clientname, mqtt_username, mqtt_passwd, mqtt_statetopic, 0, true, "offline"); //LWT
   else
     result = client.connect(mqtt_clientname);
   if (result) {
-    Serial.println("connected");
+    Serial.println("connected to MQTT-server");
     // ... and resubscribe
     client.subscribe(mqtt_topic);
-    mqttStatus("connected");
+    mqttStatus("connected to MQTT-server");
+    client.publish(mqtt_statetopic, "online", true); //retain
     u8g2.setDrawColor(0);
     u8g2.drawPixel(0,7);
     u8g2.sendBuffer();
@@ -363,7 +368,8 @@ void setup(){
   sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
   //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
   //sprintf(mqtt_statustopic, "%s", TOPIC);
-  sprintf(mqtt_statustopic, "%s/status/%s", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statustopic, "%s/%s/log", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statetopic, "%s/%s/state", TOPIC, mqtt_clientname);
   /*Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
   Serial.print(F("mqtt_server: \"")); Serial.print(mqtt_server); Serial.println(F("\"")); 
   Serial.print(F("mqtt_topic: \"")); Serial.print(mqtt_topic); Serial.println(F("\"")); 
@@ -393,7 +399,8 @@ void setup(){
   sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
   //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
   //sprintf(mqtt_statustopic, "%s", TOPIC);
-  sprintf(mqtt_statustopic, "%s/status/%s", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statustopic, "%s/%s/log", TOPIC, mqtt_clientname);
+  sprintf(mqtt_statestopic, "%s/%s/state", TOPIC, mqtt_clientname);
   loadSetting("/mqtt_username.txt", mqtt_username, 30);
   loadSetting("/mqtt_passwd.txt", mqtt_passwd, 30);
   Serial.println();
