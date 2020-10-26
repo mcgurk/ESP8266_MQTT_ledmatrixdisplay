@@ -79,6 +79,9 @@ Wifi and MQTT-information are given in configuration mode.
 
 IAS.begin() messes up timezone configuration! Call configTime after IAS.begin().
 - Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp: Line 523: configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+- Ei riittänyt. Kutsuu ilmeisesti setClock()-fuktiota tietyin väliajoin.
+- Kommentoin pois koko void IOTAppStory::setClock() -funktion sisällön. Eli hajoaa uudestaan kun kirjasto päivittyy!!!
+- Toinen vaihtoehto olisi kommentoida pois configTime tai sitten muokata sen ensimmäisiksi parametreiksi MYTZ (joka definellä ledmatrixdisplay-ohjelmassa ennen includea)
 
 ## Arduino IDE
 
