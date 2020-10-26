@@ -78,6 +78,7 @@ User-button (default GPIO0/D3/"flash"):
 Wifi and MQTT-information are given in configuration mode.
 
 IAS.begin() messes up timezone configuration! Call configTime after IAS.begin().
+- Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp: Line 523: configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 
 ## Arduino IDE
 
