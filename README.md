@@ -77,6 +77,8 @@ User-button (default GPIO0/D3/"flash"):
 
 Wifi and MQTT-information are given in configuration mode.
 
+IAS.begin() messes up timezone configuration! Call configTime after IAS.begin().
+
 ## Arduino IDE
 
 - File -> Preferences -> Additional Boards Manager URLs: http://arduino.esp8266.com/stable/package_esp8266com_index.json
