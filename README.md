@@ -82,6 +82,7 @@ IAS.begin() messes up timezone configuration! Call configTime after IAS.begin().
 - Ei riittänyt. Kutsuu ilmeisesti setClock()-fuktiota tietyin väliajoin.
 - Kommentoin pois koko void IOTAppStory::setClock() -funktion sisällön. Eli hajoaa uudestaan kun kirjasto päivittyy!!!
 - Toinen vaihtoehto olisi kommentoida pois configTime tai sitten muokata sen ensimmäisiksi parametreiksi MYTZ (joka definellä ledmatrixdisplay-ohjelmassa ennen includea)
+- https://github.com/iotappstory/ESP-Library/issues/131
 
 ## Arduino IDE
 
