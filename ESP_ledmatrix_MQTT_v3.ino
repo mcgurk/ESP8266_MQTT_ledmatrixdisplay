@@ -26,7 +26,7 @@ const uint8_t oma_3x5_tn[101] = {
 
 //#define DONTUPDATE //for testing purposes only!!!
 
-#define VERSION "V3.0.4"
+#define VERSION "V3.0.5"
 
 #define MYTZ TZ_Europe_Helsinki
 
@@ -298,7 +298,7 @@ void time_is_set() {
 void setup(){
   settimeofday_cb(time_is_set);
   //implement NTP update of timekeeping (with automatic hourly updates)
-  //configTime(MYTZ, "pool.ntp.org", "time.nist.gov"); //set after IAS.begin()!!!
+  configTime(MYTZ, "pool.ntp.org", "time.nist.gov"); //set after IAS.begin()!!!
   // https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/NTP-TZ-DST/NTP-TZ-DST.ino
   
   u8g2.begin();
@@ -368,7 +368,7 @@ void setup(){
   IAS.addField(mc, "MQTT clientname (e.g. livingroom)", 30);
 
   IAS.begin('L'); // Optional parameter: What to do with EEPROM on First boot of the app? 'F' Fully erase | 'P' Partial erase(default) | 'L' Leave intact
-  configTime(MYTZ, "pool.ntp.org", "time.nist.gov"); //set after IAS.begin()!!!
+  //configTime(MYTZ, "pool.ntp.org", "time.nist.gov"); //set after IAS.begin()!!!
   IAS.setCallHome(true); // Set to true to enable calling home frequently (disabled by default)
   IAS.setCallHomeInterval(60*60*3); // Call home interval in seconds, use 60s only for development. Please change it to at least 2 hours in production
   
@@ -462,10 +462,10 @@ void setup(){
   u8g2.drawStr(0, 8, "Loop");
   u8g2.sendBuffer();
 
-  Serial.printf("***timezone (after setup): %s\n", getenv("TZ") ? : "(none)");
+  /*Serial.printf("***timezone (after setup): %s\n", getenv("TZ") ? : "(none)");
   time_t epoch_now = now();
   Serial.print("***ctime (after setup): ");
-  Serial.print(ctime(&epoch_now));
+  Serial.print(ctime(&epoch_now));*/
  
 }
 
