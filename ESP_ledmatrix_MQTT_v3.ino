@@ -26,7 +26,7 @@ const uint8_t oma_3x5_tn[101] = {
 
 //#define DONTUPDATE //for testing purposes only!!!
 
-#define VERSION "V3.0.5"
+#define VERSION "V3.0.6"
 
 #define MYTZ TZ_Europe_Helsinki
 
@@ -290,6 +290,7 @@ void time_is_set() {
   time_t epoch_now = now();
   Serial.print("***ctime (settimeofday): ");
   Serial.print(ctime(&epoch_now));
+  mqttStatus("NTP-time updated");
 }
 
 //----------------------------------------------------------------------------------
