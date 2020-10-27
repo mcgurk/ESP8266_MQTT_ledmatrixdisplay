@@ -1,7 +1,14 @@
+// Libraries:
+// - U8g2 by oliver - https://github.com/olikraus/u8g2
+// - PubSubClient by Nick O'Leary - https://pubsubclient.knolleary.net/
+// - IOTAppStory-ESP by SensorsIot, Onno Diskzwager - https://github.com/iotappstory/ESP-Library
 // install manually (can't find from library manager):
-// ESP8266: https://github.com/me-no-dev/ESPAsyncTCP
+// - ESP8266: https://github.com/me-no-dev/ESPAsyncTCP
 // (ESP32: https://github.com/me-no-dev/AsyncTCP)
 // https://github.com/me-no-dev/ESPAsyncWebServer
+
+// REMOVE configTime-LINE OR WHOLE setClock() -FUNCTION FROM Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp !!!
+// IT CHANGES TZ-SETTINGS AND IT IS UNNECESSARY WHEN ESP8266 API IS USED (API UPDATES NTP-TIME EVERY HOUR AND MANAGES TZ)
 
 // https://github.com/olikraus/u8g2/issues/105
 // https://github.com/olikraus/u8g2/raw/master/tools/font/fony/Fony-wip.zip
@@ -131,11 +138,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println(f);
     char buf[10] = "--.-\0";
     if (pEnd != ((char*)payload)) sprintf(buf, "%4.1f", fabs(f));
-    /*if (pEnd != ((char*)payload)) {
-      sprintf(buf, "%4.1f", fabs(f));
-    } else {
-      sprintf(buf, "--.-");      
-    }*/
     Serial.println(buf);
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_helvB08_tr); //8x5 bold
@@ -191,9 +193,6 @@ void mqttStatus(char* statusmessage) {
 }
 
 void reconnect() {
-  //u8g2.clearBuffer();  
-  //u8g2.setFont(u8g2_font_ncenB08_tr);
-  //u8g2.drawStr(0, 8, "MQTT");
   u8g2.drawPixel(0,7);
   u8g2.sendBuffer();
   Serial.print("Attempting MQTT connection...");
@@ -299,7 +298,7 @@ void time_is_set() {
 void setup(){
   settimeofday_cb(time_is_set);
   //implement NTP update of timekeeping (with automatic hourly updates)
-  configTime(MYTZ, "pool.ntp.org", "time.nist.gov"); //set after IAS.begin()!!!
+  configTime(MYTZ, "pool.ntp.org", "time.nist.gov");
   // https://github.com/esp8266/Arduino/blob/master/libraries/esp8266/examples/NTP-TZ-DST/NTP-TZ-DST.ino
   
   u8g2.begin();
@@ -369,7 +368,6 @@ void setup(){
   IAS.addField(mc, "MQTT clientname (e.g. livingroom)", 30);
 
   IAS.begin('L'); // Optional parameter: What to do with EEPROM on First boot of the app? 'F' Fully erase | 'P' Partial erase(default) | 'L' Leave intact
-  //configTime(MYTZ, "pool.ntp.org", "time.nist.gov"); //set after IAS.begin()!!!
   IAS.setCallHome(true); // Set to true to enable calling home frequently (disabled by default)
   IAS.setCallHomeInterval(60*60*3); // Call home interval in seconds, use 60s only for development. Please change it to at least 2 hours in production
   
@@ -378,8 +376,6 @@ void setup(){
   strcpy(mqtt_passwd, mp);
   strcpy(mqtt_clientname, mc);
   sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
-  //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
-  //sprintf(mqtt_statustopic, "%s", TOPIC);
   sprintf(mqtt_statustopic, "%s/%s/log", TOPIC, mqtt_clientname);
   sprintf(mqtt_statetopic, "%s/%s/state", TOPIC, mqtt_clientname);
   /*Serial.print(F("ms: \"")); Serial.print(ms); Serial.println(F("\"")); 
@@ -409,8 +405,6 @@ void setup(){
   if (result == 1 && mqtt_server[0] != '\0') mqttEnabled = 1;
   loadSetting("/mqtt_clientname.txt", mqtt_clientname, 30);
   sprintf(mqtt_topic, "%s/%s", TOPIC, mqtt_clientname);
-  //sprintf(mqtt_statustopic, "%s%s/status", TOPIC, mqtt_clientname);
-  //sprintf(mqtt_statustopic, "%s", TOPIC);
   sprintf(mqtt_statustopic, "%s/%s/log", TOPIC, mqtt_clientname);
   sprintf(mqtt_statestopic, "%s/%s/state", TOPIC, mqtt_clientname);
   loadSetting("/mqtt_username.txt", mqtt_username, 30);
