@@ -7,8 +7,8 @@
 // (ESP32: https://github.com/me-no-dev/AsyncTCP)
 // https://github.com/me-no-dev/ESPAsyncWebServer
 
-// REMOVE configTime-LINE OR WHOLE setClock() -FUNCTION FROM Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp !!!
-// IT CHANGES TZ-SETTINGS AND IT IS UNNECESSARY WHEN ESP8266 API IS USED (API UPDATES NTP-TIME EVERY HOUR AND MANAGES TZ)
+// Arduino\libraries\IOTAppStory-ESP\src\config.h (in "#if defined  ESP8266"): !!!
+// #define SNTP_INT_CLOCK_UPD           false
 
 // https://github.com/olikraus/u8g2/issues/105
 // https://github.com/olikraus/u8g2/raw/master/tools/font/fony/Fony-wip.zip
