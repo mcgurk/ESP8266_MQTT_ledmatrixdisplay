@@ -77,11 +77,24 @@ User-button (default GPIO0/D3/"flash"):
 
 Wifi and MQTT-information are given in configuration mode.
 
-IAS.begin() messes up timezone configuration! Call configTime after IAS.begin().
-- Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp: Line 523: configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-- Ei riittänyt. Kutsuu ilmeisesti setClock()-fuktiota tietyin väliajoin.
-- Kommentoin pois koko void IOTAppStory::setClock() -funktion sisällön. Eli hajoaa uudestaan kun kirjasto päivittyy!!!
-- Toinen vaihtoehto olisi kommentoida pois configTime tai sitten muokata sen ensimmäisiksi parametreiksi MYTZ (joka definellä ledmatrixdisplay-ohjelmassa ennen includea)
+setClock()-function in Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp calls configTime and messes up timezone and DST. "Repair" editing Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp:
+```
+#if defined  ESP8266
+   #define SNTP_INT_CLOCK_UPD           false  //default is true
+```
+Another possibility is change
+```
+Arduino\libraries\IOTAppStory-ESP\src\IOTAppStory.cpp: Line 523: configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+```
+to
+```
+configTime(MYTZ, 0, "pool.ntp.org", "time.nist.gov"); //define MYTZ in your .ino
+```
+and add to your .ino before `#include <IOTAppStory.h>`:
+```
+#include <TZ.h>
+#define MYTZ TZ_Europe_Helsinki
+```
 - https://github.com/iotappstory/ESP-Library/issues/131
 
 ## Arduino IDE
