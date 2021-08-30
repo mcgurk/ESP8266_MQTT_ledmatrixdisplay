@@ -1,5 +1,5 @@
 esphome:
-  name: veneer_display
+  name: ledmatrix
   platform: ESP8266
   board: d1_mini
 
