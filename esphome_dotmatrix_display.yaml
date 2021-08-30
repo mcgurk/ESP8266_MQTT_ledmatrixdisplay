@@ -1,0 +1,172 @@
+esphome:
+  name: veneer_display
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  networks:
+  - ssid: !secret wifi_ssid
+    password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Veneer Display Fallback Hotspot"
+    password: !secret ap_password
+
+web_server:
+  port: 80
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+#  password: !secret esphome_haapi_pass
+
+ota:
+  password: !secret ota_password
+
+mqtt:
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+spi:
+  clk_pin: D8  # CLK of MAX7219
+  mosi_pin: D7 # MOSI of MAX7219
+
+display:
+  - platform: max7219digit
+    cs_pin: D6 # CS of MAX7219
+    num_chips: 8
+    intensity: 3
+    scroll_speed: 100ms
+    update_interval: 100ms
+    lambda: |-
+      it.printf(0, 0, id(digit_font), TextAlign::TOP_LEFT, "%s", id(hatxt).state.c_str());
+      it.intensity(atoi(id(habri).state.c_str()));
+      it.scroll_left();
+
+font:
+  - file: "pixelmix.ttf"
+    id: digit_font
+    size: 8
+    glyphs:
+    - ' '
+    - '@'
+    - '*'
+    - '!'
+    - '"'
+    - '%'
+    - (
+    - )
+    - +
+    - ','
+    - '-'
+    - .
+    - '0'
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    - '5'
+    - '6'
+    - '7'
+    - '8'
+    - '9'
+    - ':'
+    - A
+    - B
+    - C
+    - D
+    - E
+    - F
+    - G
+    - H
+    - I
+    - J
+    - K
+    - L
+    - M
+    - N
+    - O
+    - P
+    - Q
+    - R
+    - S
+    - T
+    - U
+    - V
+    - W
+    - X
+    - Y
+    - Z
+    - _
+    - a
+    - b
+    - c
+    - d
+    - e
+    - f
+    - g
+    - h
+    - i
+    - j
+    - k
+    - l
+    - m
+    - n
+    - o
+    - p
+    - q
+    - r
+    - s
+    - t
+    - u
+    - v
+    - w
+    - x
+    - y
+    - z
+    - °
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "Veneer Display IP Address"
+    ssid:
+      name: "Veneer Display Connected SSID"
+    bssid:
+      name: "Veneer Display Connected BSSID"
+  - platform: homeassistant
+    name: "HA Txt"
+    id: hatxt
+    entity_id: input_text.venner_text
+  - platform: homeassistant
+    name: "HA Brightness"
+    id: habri
+    entity_id: input_number.venner_bri
+    
+sensor:
+  - platform: wifi_signal
+    name: "Veneer Display WiFi Signal Sensor"
+    update_interval: 60s
+  - platform: uptime
+    name: "Veneer Display Uptime Sensor"
+  - platform: adc
+    id: adc_val
+    pin: A0 # A photoresistor is connected to 3.3V and A0, A0 is connected to GND with 10k resistor
+    name: "Veneer Display Brightness"
+    update_interval: 60s
+    unit_of_measurement: "adc"
+    filters:
+      - multiply: 3.3
+      - calibrate_linear:
+          - 0.0 -> 0.0
+          - 3.3 -> 15
