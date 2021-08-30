@@ -54,7 +54,8 @@ display:
       it.scroll_left();
 
 font:
-  - file: "pixelmix.ttf"
+  # https://www.dafont.com/pixelmix.font
+  - file: "fonts/pixelmix.ttf"
     id: digit_font
     size: 8
     glyphs:
