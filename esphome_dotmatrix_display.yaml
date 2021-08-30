@@ -38,12 +38,12 @@ time:
     id: homeassistant_time
 
 spi:
-  clk_pin: D8  # CLK of MAX7219
+  clk_pin: D5  # CLK of MAX7219
   mosi_pin: D7 # MOSI of MAX7219
 
 display:
   - platform: max7219digit
-    cs_pin: D6 # CS of MAX7219
+    cs_pin: D8 # CS of MAX7219
     num_chips: 8
     intensity: 3
     scroll_speed: 100ms
