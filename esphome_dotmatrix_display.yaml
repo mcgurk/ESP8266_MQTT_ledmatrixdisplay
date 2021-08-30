@@ -1,8 +1,10 @@
 esphome:
   name: ledmatrix
-  platform: ESP8266
-  board: d1_mini
-
+  #platform: ESP8266
+  #board: d1_mini
+  platform: ESP32
+  board: wemos_d1_mini32
+  
 wifi:
   networks:
   - ssid: !secret wifi_ssid
@@ -38,12 +40,15 @@ time:
     id: homeassistant_time
 
 spi:
-  clk_pin: D5  # CLK of MAX7219
-  mosi_pin: D7 # MOSI of MAX7219
-
+  #clk_pin: D8  # ESP8266, CLK of MAX7219
+  #mosi_pin: D7 # ESP8266, MOSI of MAX7219
+  clk_pin: 23  # ESP32, CLK of MAX7219
+  mosi_pin: 18 # ESP32, MOSI of MAX7219
+  
 display:
   - platform: max7219digit
-    cs_pin: D8 # CS of MAX7219
+    #cs_pin: D6 # ESP8266, CS of MAX7219
+    cs_pin: 19 # ESP32, CS of MAX7219
     num_chips: 8
     intensity: 3
     scroll_speed: 100ms
@@ -51,7 +56,8 @@ display:
     lambda: |-
       it.printf(0, 0, id(digit_font), TextAlign::TOP_LEFT, "%s", id(hatxt).state.c_str());
       it.intensity(atoi(id(habri).state.c_str()));
-      it.scroll_left();
+      //it.scroll_left();
+      it.scroll(true, 0, atoi(id(haspeed).state.c_str()), 0, 0);
 
 font:
   # https://www.dafont.com/pixelmix.font
@@ -136,6 +142,10 @@ font:
     - y
     - z
     - °
+    - ä
+    - ö
+    - Ä
+    - Ö
 
 text_sensor:
   - platform: wifi_info
@@ -153,6 +163,10 @@ text_sensor:
     name: "HA Brightness"
     id: habri
     entity_id: input_number.venner_bri
+  - platform: homeassistant
+    name: "HA Scroll speed"
+    id: haspeed
+    entity_id: input_number.venner_speed
     
 sensor:
   - platform: wifi_signal
