@@ -38,7 +38,7 @@ mqtt:
 time:
   - platform: homeassistant
     id: homeassistant_time
-
+    
 spi:
   #clk_pin: D8  # ESP8266, CLK of MAX7219
   #mosi_pin: D7 # ESP8266, MOSI of MAX7219
@@ -65,7 +65,10 @@ display:
         it.scroll(false);
         //it.strftime(0, 0, id(digit_font), "%H:%M:%S", id(homeassistant_time).now());
         it.strftime(0, 0, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
-        it.printf(32, 0, id(small_font), TextAlign::TOP_LEFT, "Çäöå");
+        it.printf(30, 0, id(small_font), TextAlign::TOP_LEFT, "Ç");
+      }
+      if (id(weather_temperature).has_state()) {
+        it.printf(63, 0, id(small_font), TextAlign::TOP_RIGHT , "%.1f°C", id(weather_temperature).state);
       }
 
 text_sensor:
@@ -95,6 +98,10 @@ sensor:
     update_interval: 60s
   - platform: uptime
     name: "Veneer Display Uptime Sensor"
+  - platform: homeassistant
+    id: weather_temperature
+    entity_id: weather.koti
+    attribute: temperature
   #- platform: adc
   #  id: adc_val
   #  pin: A0 # A photoresistor is connected to 3.3V and A0, A0 is connected to GND with 10k resistor
