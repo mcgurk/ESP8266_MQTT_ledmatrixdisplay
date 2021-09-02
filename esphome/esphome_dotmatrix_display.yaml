@@ -23,7 +23,6 @@ logger:
 
 # Enable Home Assistant API
 api:
-#  password: !secret esphome_haapi_pass
 
 ota:
 #  password: !secret ota_password
@@ -61,8 +60,11 @@ display:
       else 
       {
         it.scroll(false);
-        //it.strftime(0, 0, id(digit_font), "%H:%M:%S", id(homeassistant_time).now());
-        it.strftime(0, 0, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
+        //it.strftime(0, 0, id(normal_font), "%H:%M:%S", id(homeassistant_time).now());
+        //if (time.has_time)
+          it.strftime(0, 0, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
+        //else
+        //  it.printf(0, 0, id(small_font), "--:--:--");
         it.printf(30, 0, id(small_font), TextAlign::TOP_LEFT, "Ç");
       }
       if (id(weather_temperature).has_state()) {
@@ -72,30 +74,30 @@ display:
 text_sensor:
   - platform: wifi_info
     ip_address:
-      name: "Veneer Display IP Address"
+      name: "Ledmatrix IP address"
     ssid:
-      name: "Veneer Display Connected SSID"
+      name: "Ledmatrix connected SSID"
     bssid:
-      name: "Veneer Display Connected BSSID"
+      name: "Ledmatrix display connected BSSID"
   - platform: homeassistant
     name: "HA Txt"
     id: hatxt
-    entity_id: input_text.venner_text
+    entity_id: input_text.ledmatrix_text
   - platform: homeassistant
     name: "HA Brightness"
     id: habri
-    entity_id: input_number.venner_bri
+    entity_id: input_number.ledmatrix_bri
   - platform: homeassistant
     name: "HA Scroll speed"
     id: haspeed
-    entity_id: input_number.venner_speed
+    entity_id: input_number.ledmatrix_speed
     
 sensor:
   - platform: wifi_signal
-    name: "Veneer Display WiFi Signal Sensor"
+    name: "Ledmatrix display WiFi signal sensor"
     update_interval: 60s
   - platform: uptime
-    name: "Veneer Display Uptime Sensor"
+    name: "Ledmatrix display uptime sensor"
   - platform: homeassistant
     id: weather_temperature
     entity_id: weather.koti
@@ -139,13 +141,12 @@ switch:
   
 light:
   - platform: monochromatic
-    name: "Wemos LED"
-    output: output_component1
-    id: wemos_test_led
- 
+    name: "Ledmatrix LED"
+    output: output_led
+
 output:
   - platform: ledc
-    id: output_component1
+    id: output_led
     inverted: false
     pin: 2
     
@@ -240,7 +241,7 @@ font:
     - Ç
 
   - file: "fonts/pixelmix_mcg.ttf"
-    id: digit_font
+    id: normal_font
     size: 8
     glyphs:
     - ' '
