@@ -27,10 +27,10 @@ api:
 ota:
 #  password: !secret ota_password
 
-mqtt:
-  broker: !secret mqtt_broker
-  username: !secret mqtt_username
-  password: !secret mqtt_password
+#mqtt:
+#  broker: !secret mqtt_broker
+#  username: !secret mqtt_username
+#  password: !secret mqtt_password
 
 time:
   - platform: homeassistant
