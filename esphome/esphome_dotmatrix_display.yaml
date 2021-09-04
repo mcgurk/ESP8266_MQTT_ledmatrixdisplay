@@ -27,21 +27,36 @@ api:
 ota:
 #  password: !secret ota_password
 
-#mqtt:
-#  broker: !secret mqtt_broker
-#  username: !secret mqtt_username
-#  password: !secret mqtt_password
+mqtt:
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  discovery: false
 
+globals:
+  - id: timesynced
+    type: bool
+    initial_value: "false"
+    
 time:
   - platform: homeassistant
     id: homeassistant_time
-    
+  - platform: sntp
+    on_time_sync:
+      - globals.set:
+          id: timesynced
+          value: "true"
+      
+      #then:
+      #  - lambda: |-
+      #      id(timesynced) = true;
+
 spi:
   #clk_pin: D8  # ESP8266, CLK of MAX7219
   #mosi_pin: D7 # ESP8266, MOSI of MAX7219
   clk_pin: 23  # ESP32, CLK of MAX7219
   mosi_pin: 18 # ESP32, MOSI of MAX7219
-  
+
 display:
   - platform: max7219digit
     #cs_pin: D6 # ESP8266, CS of MAX7219
@@ -60,16 +75,16 @@ display:
       else 
       {
         it.scroll(false);
-        //it.strftime(0, 0, id(normal_font), "%H:%M:%S", id(homeassistant_time).now());
-        //if (time.has_time)
+        if (id(timesynced))
           it.strftime(0, 0, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
-        //else
-        //  it.printf(0, 0, id(small_font), "--:--:--");
-        it.printf(30, 0, id(small_font), TextAlign::TOP_LEFT, "Ç");
+        else it.printf(0, 0, id(small_font), "--:--:--");
+        //it.printf(31, 0, id(small_font), TextAlign::TOP_LEFT, "Ç");
+        it.printf(29, 0, id(small_font), TextAlign::TOP_LEFT, id(hasymbol).state.c_str());
+        if (id(weather_temperature).has_state())
+          it.printf(65, 0, id(small_font), TextAlign::TOP_RIGHT , "%.1f°C", id(weather_temperature).state);
+        else it.printf(65, 0, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
       }
-      if (id(weather_temperature).has_state()) {
-        it.printf(63, 0, id(small_font), TextAlign::TOP_RIGHT , "%.1f°C", id(weather_temperature).state);
-      }
+
 
 text_sensor:
   - platform: wifi_info
@@ -91,6 +106,10 @@ text_sensor:
     name: "HA Scroll speed"
     id: haspeed
     entity_id: input_number.ledmatrix_speed
+  - platform: homeassistant
+    name: "HA Symbol"
+    id: hasymbol
+    entity_id: input_text.ledmatrix_symbol
     
 sensor:
   - platform: wifi_signal
@@ -132,13 +151,7 @@ switch:
       - switch.template.publish:
           id: my_switch
           state: OFF
-#    lambda: |-
-#      if (id(my_switch).state) {
-#        return true;
-#      } else {
-#        return false;
-#      }
-  
+
 light:
   - platform: monochromatic
     name: "Ledmatrix LED"
@@ -239,6 +252,7 @@ font:
     - Ö
     - Å
     - Ç
+    - È
 
   - file: "fonts/pixelmix_mcg.ttf"
     id: normal_font
