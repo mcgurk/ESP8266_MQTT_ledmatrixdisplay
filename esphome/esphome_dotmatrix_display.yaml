@@ -46,10 +46,7 @@ time:
       - globals.set:
           id: timesynced
           value: "true"
-      
-      #then:
-      #  - lambda: |-
-      #      id(timesynced) = true;
+
 
 spi:
   #clk_pin: D8  # ESP8266, CLK of MAX7219
@@ -86,6 +83,7 @@ display:
       }
 
 
+
 text_sensor:
   - platform: wifi_info
     ip_address:
@@ -119,7 +117,8 @@ sensor:
     name: "Ledmatrix display uptime sensor"
   - platform: homeassistant
     id: weather_temperature
-    entity_id: sensor.ouman_outdoortemperature
+    entity_id: sensor.outdoor_temperature
+    #entity_id: sensor.ouman_outdoortemperature
     #entity_id: weather.koti
     #attribute: temperature
   #- platform: adc
