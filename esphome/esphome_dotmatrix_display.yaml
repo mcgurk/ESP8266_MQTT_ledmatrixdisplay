@@ -117,8 +117,8 @@ sensor:
     name: "Ledmatrix display uptime sensor"
   - platform: homeassistant
     id: weather_temperature
-    entity_id: sensor.outdoor_temperature
-    #entity_id: sensor.ouman_outdoortemperature
+    #entity_id: sensor.outdoor_temperature
+    entity_id: sensor.ouman_outdoortemperature
     #entity_id: weather.koti
     #attribute: temperature
   #- platform: adc
