@@ -67,7 +67,8 @@ display:
       if (id(my_switch).state) 
       {
         it.printf(0, 0, id(small_font), TextAlign::TOP_LEFT, "%s", id(hatxt).state.c_str());
-        it.scroll(true, 0, atoi(id(haspeed).state.c_str()), 0, 0);
+        //it.scroll(true, 0, atoi(id(haspeed).state.c_str()), 0, 0);
+        it.scroll(true, max7219digit::CONTINUOUS, atoi(id(haspeed).state.c_str()), 0, 0);
       }
       else 
       {
