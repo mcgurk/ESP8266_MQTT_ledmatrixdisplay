@@ -27,11 +27,11 @@ api:
 ota:
 #  password: !secret ota_password
 
-mqtt:
-  broker: !secret mqtt_broker
-  username: !secret mqtt_username
-  password: !secret mqtt_password
-  discovery: false
+#mqtt:
+#  broker: !secret mqtt_broker
+#  username: !secret mqtt_username
+#  password: !secret mqtt_password
+#  discovery: false
 
 globals:
   - id: timesynced
@@ -46,7 +46,6 @@ time:
       - globals.set:
           id: timesynced
           value: "true"
-
 
 spi:
   #clk_pin: D8  # ESP8266, CLK of MAX7219
@@ -67,23 +66,25 @@ display:
       if (id(my_switch).state) 
       {
         it.printf(0, 0, id(small_font), TextAlign::TOP_LEFT, "%s", id(hatxt).state.c_str());
-        //it.scroll(true, 0, atoi(id(haspeed).state.c_str()), 0, 0);
+        //it.scroll(true, 0, atoi(id(haspeed).state.c_str()), max7219digit::CONTINUOUS, 0);
         it.scroll(true, max7219digit::CONTINUOUS, atoi(id(haspeed).state.c_str()), 0, 0);
       }
       else 
       {
         it.scroll(false);
         if (id(timesynced))
-          it.strftime(0, 0, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
-        else it.printf(0, 0, id(small_font), "--:--:--");
-        //it.printf(31, 0, id(small_font), TextAlign::TOP_LEFT, "Ç");
-        it.printf(29, 0, id(small_font), TextAlign::TOP_LEFT, id(hasymbol).state.c_str());
+          it.strftime(0, -1, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
+        else it.printf(0, -1, id(small_font), "--:--:--");
+        //it.printf(31, -1, id(small_font), TextAlign::TOP_LEFT, "Ç");
+        it.printf(29, -1, id(small_font), TextAlign::TOP_LEFT, id(hasymbol).state.c_str());
         if (id(weather_temperature).has_state())
-          it.printf(65, 0, id(small_font), TextAlign::TOP_RIGHT , "%.1f°C", id(weather_temperature).state);
-        else it.printf(65, 0, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
+          it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(weather_temperature).state);
+        else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
+        if (id(haindicator2).state) {
+          it.line(0,7,31,6);
+          it.line(32,6,63,7);
+        }
       }
-
-
 
 text_sensor:
   - platform: wifi_info
@@ -119,27 +120,13 @@ sensor:
   - platform: homeassistant
     id: weather_temperature
     entity_id: sensor.outdoor_temperature
-    #entity_id: sensor.ouman_outdoortemperature
-    #entity_id: weather.koti
-    #attribute: temperature
-  #- platform: adc
-  #  id: adc_val
-  #  pin: A0 # A photoresistor is connected to 3.3V and A0, A0 is connected to GND with 10k resistor
-  #  name: "Veneer Display Brightness"
-  #  update_interval: 60s
-  #  unit_of_measurement: "adc"
-  #  filters:
-  #    - multiply: 3.3
-  #    - calibrate_linear:
-  #        - 0.0 -> 0.0
-  #        - 3.3 -> 15
-  
-#switch:
-#  - platform: gpio
-#    id: my_switch
-#    name: "my switch"
-#    pin: 3
 
+binary_sensor:
+  - platform: homeassistant
+    name: "HA indicator2"
+    id: haindicator2
+    entity_id: switch.ulkopistorasia
+    
 switch:
   - platform: template
     id: my_switch
