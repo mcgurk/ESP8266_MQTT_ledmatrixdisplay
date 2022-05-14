@@ -75,11 +75,18 @@ display:
         if (id(timesynced))
           it.strftime(0, -1, id(small_font), "%H:%M:%S", id(homeassistant_time).now());
         else it.printf(0, -1, id(small_font), "--:--:--");
-        //it.printf(31, -1, id(small_font), TextAlign::TOP_LEFT, "Ç");
-        it.printf(29, -1, id(small_font), TextAlign::TOP_LEFT, id(hasymbol).state.c_str());
-        if (id(weather_temperature).has_state())
-          it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(weather_temperature).state);
-        else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
+
+        if (id(wcindicator).state) it.printf(29, -1, id(small_font), TextAlign::TOP_LEFT, "È");
+        
+        if (id(indoor_switch).state)
+          if (id(indoor_temperature).has_state())
+            it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(indoor_temperature).state);
+          else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
+        else
+          if (id(weather_temperature).has_state())
+            it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(weather_temperature).state);
+          else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
+        
         if (id(haindicator2).state) {
           it.line(0,7,31,6);
           it.line(32,6,63,7);
@@ -120,12 +127,18 @@ sensor:
   - platform: homeassistant
     id: weather_temperature
     entity_id: sensor.outdoor_temperature
-
+  - platform: homeassistant
+    id: indoor_temperature
+    entity_id: sensor.lora_indoortemperature
+    
 binary_sensor:
   - platform: homeassistant
     name: "HA indicator2"
     id: haindicator2
     entity_id: switch.ulkopistorasia
+  - platform: homeassistant
+    id: wcindicator
+    entity_id: input_boolean.wc_occupancy
     
 switch:
   - platform: template
@@ -139,7 +152,18 @@ switch:
       - switch.template.publish:
           id: my_switch
           state: OFF
-
+  - platform: template
+    id: indoor_switch
+    name: "indoor_switch"
+    turn_on_action:
+      - switch.template.publish:
+          id: indoor_switch
+          state: ON
+    turn_off_action:
+      - switch.template.publish:
+          id: indoor_switch
+          state: OFF
+          
 light:
   - platform: monochromatic
     name: "Ledmatrix LED"
