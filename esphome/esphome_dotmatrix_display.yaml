@@ -62,6 +62,7 @@ display:
     #scroll_speed: 100ms
     update_interval: 100ms
     lambda: |-
+      //if (id(haindicator4).state) it.set_invert(true); else it.set_invert(false);
       it.intensity(atoi(id(habri).state.c_str()));
       if (id(my_switch).state) 
       {
@@ -88,8 +89,21 @@ display:
           else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
         
         if (id(haindicator2).state) {
-          it.line(0,7,31,6);
-          it.line(32,6,63,7);
+          it.line(62,6,63,7);
+          it.line(59,6,60,7);
+          it.line(56,6,57,7);
+          it.line(53,6,54,7);
+        }
+        if (id(haindicator3).state) {
+          it.line(0,7,1,6);
+          it.line(1,6,2,7);
+          it.line(1,7,2,7);
+          it.line(4,7,5,6);
+          it.line(5,6,6,7);
+          it.line(4,7,6,7);
+        }
+        if (id(haindicator4).state) {
+          it.line(0,7,63,7);
         }
       }
 
@@ -136,6 +150,14 @@ binary_sensor:
     name: "HA indicator2"
     id: haindicator2
     entity_id: switch.ulkopistorasia
+  - platform: homeassistant
+    name: "HA indicator3"
+    id: haindicator3
+    entity_id: light.ylakerta_jarno_kattovalo
+  - platform: homeassistant
+    name: "HA indicator4"
+    id: haindicator4
+    entity_id: binary_sensor.piha_ulkorappu_liikesensori_occupancy
   - platform: homeassistant
     id: wcindicator
     entity_id: input_boolean.wc_occupancy
