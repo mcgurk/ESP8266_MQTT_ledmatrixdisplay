@@ -147,6 +147,10 @@ sensor:
     
 binary_sensor:
   - platform: homeassistant
+    id: wcindicator
+    entity_id: binary_sensor.wc_liiketunnistin_occupancy
+    #entity_id: input_boolean.wc_occupancy
+  - platform: homeassistant
     name: "HA indicator2"
     id: haindicator2
     entity_id: switch.ulkopistorasia
@@ -158,9 +162,6 @@ binary_sensor:
     name: "HA indicator4"
     id: haindicator4
     entity_id: binary_sensor.piha_ulkorappu_liikesensori_occupancy
-  - platform: homeassistant
-    id: wcindicator
-    entity_id: input_boolean.wc_occupancy
     
 switch:
   - platform: template
