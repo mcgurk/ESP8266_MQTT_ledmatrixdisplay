@@ -81,11 +81,17 @@ display:
         
         if (id(indoor_switch).state)
           if (id(indoor_temperature).has_state())
-            it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(indoor_temperature).state);
+            if (id(indoor_temperature).state == 0.0)
+              it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "0.0°C");
+            else
+              it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(indoor_temperature).state);
           else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
         else
           if (id(weather_temperature).has_state())
-            it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(weather_temperature).state);
+            if (id(weather_temperature).state == 0.0)
+              it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "0.0°C");
+            else
+              it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "%+.1f°C", id(weather_temperature).state);
           else it.printf(65, -1, id(small_font), TextAlign::TOP_RIGHT , "--.-°C");
         
         if (id(haindicator2).state) {
